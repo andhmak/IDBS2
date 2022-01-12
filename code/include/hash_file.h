@@ -13,6 +13,12 @@ typedef struct Record {
 	char city[20];
 } Record;
 
+typedef struct update{
+  Record record;
+  tTuple *newTuple;
+  tTuple *oldTuple;
+} UpdateRecordArray;
+
 /*
  * Η συνάρτηση HT_Init χρησιμοποιείται για την αρχικοποίηση κάποιον δομών που μπορεί να χρειαστείτε. 
  * Σε περίπτωση που εκτελεστεί επιτυχώς, επιστρέφεται HT_OK, ενώ σε διαφορετική περίπτωση κωδικός λάθους.
@@ -55,7 +61,9 @@ HT_ErrorCode HT_CloseFile(
  */
 HT_ErrorCode HT_InsertEntry(
 	int indexDesc,	/* θέση στον πίνακα με τα ανοιχτά αρχεία */
-	Record record		/* δομή που προσδιορίζει την εγγραφή */
+	Record record,		/* δομή που προσδιορίζει την εγγραφή */
+	int tupleId,
+	UpdateRecordArray *updateArray
 	);
 
 /*

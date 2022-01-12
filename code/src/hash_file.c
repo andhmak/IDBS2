@@ -59,6 +59,11 @@ typedef struct OpenFileData {
   int *index;
 } OpenFileData;
 
+typedef struct tuple{
+  int block_num;
+  int record_num;
+} tTuple;
+
 // Array of open files in memory
 OpenFileData open_files[MAX_OPEN_FILES];
 
@@ -306,7 +311,7 @@ HT_ErrorCode HT_CloseFile(int indexDesc) {
   return HT_OK;
 }
 
-HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
+HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, int tupleId, UpdateRecordArray *updateArray) {
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
     printf("Invalied indexDesc\n");
@@ -406,6 +411,12 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       strcpy(targetData->index[targetData->lastEmpty].name,record.name);
       strcpy(targetData->index[targetData->lastEmpty].surname,record.surname);
       strcpy(targetData->index[targetData->lastEmpty].city,record.city);
+
+      tTuple *record_pos;
+      record_pos->block_num = open_files[indexDesc].index[hashID];
+      record_pos->record_num = targetData->lastEmpty;
+      tupleId = (int)record_pos;
+
       targetData->lastEmpty++;
       BF_Block_SetDirty(targetBlock);
       CALL_BF(BF_UnpinBlock(targetBlock));
@@ -462,15 +473,28 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       //making an array with all the entries of this block
       int entryAmount = 1+targetData->lastEmpty;
       Record *entryArray=malloc(entryAmount*sizeof(Record));  //1 for the new entry and all the entries of the block
+      updateArray = malloc(entryAmount*sizeof(UpdateRecordArray));
       entryArray[0].id = record.id;
       strcpy(entryArray[0].name,record.name);
       strcpy(entryArray[0].surname,record.surname);
       strcpy(entryArray[0].city,record.city);
+
+      updateArray[0].record = record;
+      updateArray[0].oldTuple = NULL;
+
       for (int i = 0; i < targetData->lastEmpty; i++){
         entryArray[i+1].id = targetData->index[i].id;
         strcpy(entryArray[i+1].name,targetData->index[i].name);
         strcpy(entryArray[i+1].surname,targetData->index[i].surname);
         strcpy(entryArray[i+1].city,targetData->index[i].city);
+
+        updateArray[i+1].record.id = targetData->index[i].id;
+        strcpy(updateArray[i+1].record.name,targetData->index[i].name);
+        strcpy(updateArray[i+1].record.surname,targetData->index[i].surname);
+        strcpy(updateArray[i+1].record.city,targetData->index[i].city);
+
+        updateArray[i+1].oldTuple->block_num = open_files[indexDesc].index[hashID];
+        updateArray[i+1].oldTuple->record_num = i;
       }
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
       StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
@@ -515,7 +539,9 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
         free(open_files[indexDesc].index);
         open_files[indexDesc].index=newIndex;
         for (int i=0;i<entryAmount;i++){
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
+          int temp_tuple;
+          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],temp_tuple,updateArray);
+          updateArray[i].newTuple = (tTuple *)temp_tuple;
         }
         free(entryArray);
 
@@ -557,7 +583,9 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
         BF_Block_Destroy(&newBlock);
 
         for (int i=0;i<entryAmount;i++){
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
+          int temp_tuple;
+          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],temp_tuple,updateArray);
+          updateArray[i].newTuple = (tTuple *)temp_tuple;
         }
         free(entryArray);
 
