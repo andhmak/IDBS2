@@ -333,7 +333,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
     printf("This should not be used in project 2");
     return HT_ERROR;
 
-    int next = targetData->nextBlock;
+    /*int next = targetData->nextBlock;
     while(next != -1) {
       CALL_BF(BF_UnpinBlock(targetBlock));
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, next, targetBlock));
@@ -361,7 +361,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
 
       return HT_OK;
     }
-    /*else{
+    else{
       //make next block
       BF_Block *newBlock;
       BF_Block_Init(&newBlock);
@@ -395,7 +395,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       BF_Block_Destroy(&newBlock);
 
       return HT_OK;
-    }*/
+    }
+    */
   }
   else/*if(targetData->nextBlock==-1)*/{  //only one block
 
