@@ -329,6 +329,9 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
   DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
 
   if(targetData->nextBlock!=-1){ //overflow
+    //removed multiblock buckets to simplify the implementation of the secondery index
+    printf("This should not be used in project 2");
+    return HT_ERROR;
 
     int next = targetData->nextBlock;
     while(next != -1) {
@@ -358,7 +361,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
 
       return HT_OK;
     }
-    else{
+    /*else{
       //make next block
       BF_Block *newBlock;
       BF_Block_Init(&newBlock);
@@ -392,7 +395,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       BF_Block_Destroy(&newBlock);
 
       return HT_OK;
-    }
+    }*/
   }
   else/*if(targetData->nextBlock==-1)*/{  //only one block
 
@@ -417,7 +420,9 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       return HT_OK;
     }
     else if(targetData->localDepth==MAX_DEPTH){    //reached MAX depth
-      //make next block
+      printf("Can't insert record: Block full and index at max depth");
+      return HT_ERROR;
+      /*//make next block
       BF_Block *newBlock;
       BF_Block_Init(&newBlock);
       DataBlock *newBlockData;
@@ -449,7 +454,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record) {
       BF_Block_Destroy(&targetBlock);
       BF_Block_Destroy(&newBlock);
 
-      return HT_OK;
+      return HT_OK;*/
     }
     else{
       //split
