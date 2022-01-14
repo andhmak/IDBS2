@@ -206,7 +206,7 @@ HT_ErrorCode HT_OpenIndex(const char *fileName, int *indexDesc){
 HT_ErrorCode HT_CloseFile(int indexDesc) {
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
-    printf("Invalied indexDesc\n");
+    printf("Invalid indexDesc\n");
     return HT_ERROR;
   }
 
@@ -299,7 +299,7 @@ HT_ErrorCode HT_CloseFile(int indexDesc) {
 HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, UpdateRecordArray *updateArray) {
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
-    printf("Invalied indexDesc\n");
+    printf("Invalid indexDesc\n");
     return HT_ERROR;
   }
 
@@ -583,7 +583,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
 HT_ErrorCode HT_PrintAllEntries(int indexDesc, int *id) {
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
-    printf("Invalied indexDesc\n");
+    printf("Invalid indexDesc\n");
     return HT_ERROR;
   }
 

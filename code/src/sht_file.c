@@ -207,7 +207,7 @@ HT_ErrorCode SHT_CloseSecondaryIndex(int indexDesc) {
   //insert code here
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
-    printf("Invalied indexDesc\n");
+    printf("Invalid indexDesc\n");
     return HT_ERROR;
   }
 
