@@ -13,6 +13,11 @@ typedef struct Record {
 	char city[20];
 } Record;
 
+typedef struct tTuple {
+  int block_num;
+  int record_num;
+} tTuple;
+
 typedef struct update{
   Record record;
   tTuple *newTuple;

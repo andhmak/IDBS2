@@ -59,11 +59,6 @@ typedef struct OpenFileData {
   int *index;
 } OpenFileData;
 
-typedef struct tuple{
-  int block_num;
-  int record_num;
-} tTuple;
-
 // Array of open files in memory
 OpenFileData open_files[MAX_OPEN_FILES];
 
