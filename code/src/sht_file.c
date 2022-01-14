@@ -617,10 +617,12 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   BF_Block* block2;
   BF_Block_Init(&block2);
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
-  for (int j = 0 ; j < indexSize ; j++) {
-    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[j], block));
+  for (int i = 0 ; i < indexSize ; i++) {
+    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
-    
+    for (int j = 0 ; j < data->lastEmpty ; j++) {
+      data->index[j];
+    }
     CALL_BF(BF_UnpinBlock(block));
   }
   BF_Block_Destroy(&block);
