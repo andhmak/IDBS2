@@ -205,6 +205,95 @@ HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
 
 HT_ErrorCode SHT_CloseSecondaryIndex(int indexDesc) {
   //insert code here
+  // Check if indexDesc valid
+  if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
+    printf("Invalied indexDesc\n");
+    return HT_ERROR;
+  }
+
+  // Check if secondary entry
+  if (open_files[indexDesc].mainPos != -1) {
+    open_files[indexDesc].fileDesc = -1;
+    strcpy(open_files[indexDesc].filename, "");
+    return HT_OK;
+  }
+
+  // Check if file is already open elsewhere as secondary entry
+  for (int j = 0 ; j < MAX_OPEN_FILES ; j++) {
+    if((strcmp(open_files[j].filename, open_files[indexDesc].filename) == 0) && (j != indexDesc)) {
+      open_files[indexDesc].fileDesc = -1;
+      strcpy(open_files[indexDesc].filename, "");
+      open_files[j].mainPos = -1;
+      open_files[j].globalDepth = open_files[indexDesc].globalDepth;
+      open_files[j].index = open_files[indexDesc].index;
+      for (int k = 0 ; k < MAX_OPEN_FILES ; k++) {
+        if((strcmp(open_files[j].filename, open_files[k].filename) == 0) && (k != j)) {
+          open_files[k].mainPos = j;
+        }
+      }
+      return HT_OK;
+    }
+  }
+
+  // Else write index information to disk close it completely
+  int fd = open_files[indexDesc].fileDesc;
+  BF_Block* block;
+  BF_Block_Init(&block);
+
+  CALL_BF(BF_GetBlock(fd, 0, block));
+  StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+  stat->globalDepth = open_files[indexDesc].globalDepth;
+  BF_Block_SetDirty(block);
+  CALL_BF(BF_UnpinBlock(block));
+
+  CALL_BF(BF_GetBlock(fd, 1, block));
+  IndexBlock* data = (IndexBlock*) BF_Block_GetData(block);
+  int indexSize = 1;
+  for (int j = 0; j < open_files[indexDesc].globalDepth; j++) {
+    indexSize *= 2;
+  }
+  int blockAmount;
+  CALL_BF(BF_GetBlockCounter(fd, &blockAmount));
+  int nextBlock;
+  for (int j = 0 ; j < indexSize ; ) {
+    for (int k = 0 ; k < INDEX_ARRAY_SIZE; k++, j++) {
+      if (j < indexSize) {
+        data->index[k] = open_files[indexDesc].index[j];
+      }
+      else {
+        data->index[k] = -1;
+      }
+    }
+    nextBlock = data->nextBlock;
+    if (nextBlock == -1) {
+      if (j < indexSize - 1) {
+        data->nextBlock = blockAmount++;
+        BF_Block_SetDirty(block);
+        CALL_BF(BF_UnpinBlock(block));
+        CALL_BF(BF_AllocateBlock(fd, block));
+        data = (IndexBlock*) BF_Block_GetData(block);
+        data->nextBlock = -1;
+      }
+      else {
+        BF_Block_SetDirty(block);
+        CALL_BF(BF_UnpinBlock(block));
+      }
+    }
+    else {
+      BF_Block_SetDirty(block);
+      CALL_BF(BF_UnpinBlock(block));
+      if (j < indexSize - 1) {
+        CALL_BF(BF_GetBlock(fd, nextBlock, block));
+        data = (IndexBlock*) BF_Block_GetData(block);
+      }
+    }
+  }
+  BF_Block_Destroy(&block);
+
+  CALL_BF(BF_CloseFile(open_files[indexDesc].fileDesc));
+  free(open_files[indexDesc].index);
+  open_files[indexDesc].fileDesc = -1;
+  strcpy(open_files[indexDesc].filename, "");
   return HT_OK;
 }
 
