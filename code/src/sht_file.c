@@ -138,6 +138,68 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
 
 HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
   //insert code here
+  // Check for empty position in open files array
+  int i;
+  for (i = 0 ; i < MAX_OPEN_FILES ; i++) {
+    if(open_files[i].fileDesc == -1) {
+      break;
+    }
+  }
+  if (i == MAX_OPEN_FILES) {
+    printf("Too many open files\n");
+    return HT_ERROR;
+  }
+
+  *indexDesc = i;
+
+  // Check if file is already open
+  for (int j = 0 ; j < MAX_OPEN_FILES ; j++) {
+    if((strcmp(open_files[j].filename, sfileName) == 0) && (open_files[j].mainPos == -1)) {
+      strcpy(open_files[i].filename, sfileName);
+      open_files[i].mainPos = j;
+      open_files[i].fileDesc = open_files[j].fileDesc;
+      open_files[i].index = open_files[j].index;
+      return HT_OK;
+    }
+  }
+  
+  // Else open it bring everything necessary to memory
+  strcpy(open_files[i].filename, sfileName);
+  open_files[i].mainPos = -1;
+  int fd;
+  CALL_BF(BF_OpenFile(sfileName, &fd));
+  open_files[i].fileDesc = fd;
+  
+  BF_Block* block;
+  BF_Block_Init(&block);
+  CALL_BF(BF_GetBlock(fd, 0, block));
+  StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+  open_files[i].globalDepth = stat->globalDepth;
+  CALL_BF(BF_UnpinBlock(block));
+  int indexSize = 1;
+  for (int j = 0; j < open_files[i].globalDepth; j++) {
+    indexSize *= 2;
+  }
+  if ((open_files[i].index = malloc(indexSize*sizeof(int))) == NULL) {
+    CALL_BF(BF_Close(fd));
+    return HT_ERROR;
+  }
+  CALL_BF(BF_GetBlock(fd, 1, block));
+  IndexBlock* data = (IndexBlock*) BF_Block_GetData(block);
+  int nextBlock;
+  int j = 0;
+  do {
+    for (int k = 0 ; (k < INDEX_ARRAY_SIZE) && (j < indexSize); k++, j++) {
+      open_files[i].index[j] = data->index[k];
+    }
+    nextBlock = data->nextBlock;
+    CALL_BF(BF_UnpinBlock(block));
+    if (nextBlock != -1) {
+      CALL_BF(BF_GetBlock(fd, nextBlock, block));
+      data = (IndexBlock*) BF_Block_GetData(block);
+    }
+  } while (nextBlock != -1);
+  BF_Block_Destroy(&block);
   return HT_OK;
 }
 
