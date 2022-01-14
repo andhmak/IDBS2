@@ -24,6 +24,7 @@ typedef struct StatBlock {
   int total_buckets;
   int globalDepth;
   int attribType;  // 0 for city, 1 for surname
+  char mainFileName[NAME_BUF];
 } StatBlock;
 
 // Parts of the array to be stored in blocks in the disk
@@ -81,6 +82,7 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
     CALL_BF(BF_CloseFile(fileDesc));
     return HT_ERROR;
   }
+  strcpy(stat->mainFileName, fileName);
 
   BF_Block_SetDirty(block);
   CALL_BF(BF_UnpinBlock(block));
