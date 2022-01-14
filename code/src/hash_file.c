@@ -566,9 +566,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         BF_Block_Destroy(&newBlock);
 
         for (int i=0;i<entryAmount;i++){
-          int temp_tuple;
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],temp_tuple,updateArray);
-          updateArray[i].newTuple = (tTuple *)temp_tuple;
+          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],updateArray[i].newTuple,updateArray);
         }
         free(entryArray);
 
