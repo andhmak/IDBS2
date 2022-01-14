@@ -611,11 +611,27 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     sindexDesc2 = open_files[sindexDesc2].mainPos;
   }
 
-  // If it is, scan it using the index in the memory
   BF_Block* block;
   BF_Block_Init(&block);
   BF_Block* block2;
   BF_Block_Init(&block2);
+
+  CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, 0, block));
+  StatBlock* stat1 = (StatBlock*) BF_Block_GetData(block);
+  CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, 0, block2));
+  StatBlock* stat2 = (StatBlock*) BF_Block_GetData(block2);
+
+  if (stat1->attribType != stat2->attribType) {
+    printf("Incompatible attrivute types\n");
+    CALL_BF(BF_UnpinBlock(block));
+    CALL_BF(BF_UnpinBlock(block2));
+    BF_Block_Destroy(&block);
+    BF_Block_Destroy(&block2);
+    return HT_ERROR;
+  }
+
+
+
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int i = 0 ; i < indexSize ; i++) {
     CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
