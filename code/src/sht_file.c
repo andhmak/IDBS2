@@ -622,7 +622,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   StatBlock* stat2 = (StatBlock*) BF_Block_GetData(block2);
 
   if (stat1->attribType != stat2->attribType) {
-    printf("Incompatible attrivute types\n");
+    printf("Incompatible attribute types\n");
     CALL_BF(BF_UnpinBlock(block));
     CALL_BF(BF_UnpinBlock(block2));
     BF_Block_Destroy(&block);
@@ -630,15 +630,18 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     return HT_ERROR;
   }
 
-
-
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int i = 0 ; i < indexSize ; i++) {
     CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
     for (int j = 0 ; j < data->lastEmpty ; j++) {
       CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hash_string(data->index[j].index_key)], block2));
-      data->index[j];
+      DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
+      for (int k = 0 ; k < data2->lastEmpty ; k++) {
+        if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
+
+        }
+      }
     }
     CALL_BF(BF_UnpinBlock(block));
   }
