@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "bf.h"
-#include "hash_file.h"
 #include "sht_file.h"
 
 #define CALL_BF(call)       \
@@ -14,9 +13,6 @@
     return HP_ERROR;        \
   }                         \
 }
-
-#ifndef HASH_FILE_H2
-#define HASH_FILE_H2
 
 
 typedef enum HT_ErrorCode {
@@ -364,6 +360,3 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2,  char *index-key ) 
   //insert code here
   return HT_OK;
 }
-
-
-#endif // HASH_FILE_H

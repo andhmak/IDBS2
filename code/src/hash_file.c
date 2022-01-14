@@ -6,6 +6,7 @@
 #include "bf.h"
 #include "hash_file.h"
 
+
 #define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))  // Amount of records per bucket
 #define MAX_DEPTH (8*sizeof(int)-8) // Maximum global depth of the hash table

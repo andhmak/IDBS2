@@ -1,5 +1,3 @@
-#ifndef HASH_FILE_H
-#define HASH_FILE_H
 #define MAX_OPEN_FILES 20
 #define NAME_BUF 100
 
@@ -91,6 +89,3 @@ HT_ErrorCode HT_PrintAllEntries(
 	int indexDesc,	/* θέση στον πίνακα με τα ανοιχτά αρχεία */
 	int *id 				/* τιμή του πεδίου κλειδιού προς αναζήτηση */
 	);
-
-
-#endif // HASH_FILE_H

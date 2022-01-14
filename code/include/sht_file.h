@@ -1,6 +1,3 @@
-#ifndef HASH_FILE_H2
-#define HASH_FILE_H2
-
 #include "hash_file.h"
 
 typedef enum HT_ErrorCode {
@@ -62,6 +59,3 @@ HT_ErrorCode SHT_InnerJoin(
 int sindexDesc1, /* θέση στον πίνακα με τα ανοιχτά αρχεία  του αρχείου δευτερεύοντος ευρετηρίου για το πρώτο αρχείο εισόδου */
 int sindexDesc2, /* θέση στον πίνακα με τα ανοιχτά αρχεία του αρχείου δευτερεύοντος ευρετηρίου για το δεύτερο αρχείο εισόδου */
 char *index_key  /* το κλειδι πανω στο οποιο θα γινει το join. Αν  NULL τοτε επιστρέφεί όλες τις πλειάδες*/);
-
-
-#endif // HASH_FILE_H
