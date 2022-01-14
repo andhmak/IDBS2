@@ -43,6 +43,14 @@ typedef struct DataBlock {
   SecondaryRecord index[DATA_ARRAY_SIZE];
 } DataBlock;
 
+// For blocks acting as buckets
+typedef struct PrimaryDataBlock {
+  int localDepth;
+  int lastEmpty;
+  int nextBlock;
+  Record index[DATA_ARRAY_SIZE];
+} PrimaryDataBlock;
+
 uint hash_string(char* string) {
   uint hash = 5381;
 
@@ -651,9 +659,15 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
         if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
           CALL_BF(BF_GetBlock(mainFileDesc1, data->index[j].tupleId.block_num, block3));
-          DataBlock* data3 = (DataBlock*) BF_Block_GetData(block3);
-          data3->index[data->index[j].tupleId.record_num];
-          printf("", )
+          PrimaryDataBlock* data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
+          Record rec = data3->index[data->index[j].tupleId.record_num];
+          printf("{%i,%s,%s,%s} - ", rec.id, rec.name, rec.surname, rec.city);
+          CALL_BF(BF_UnpinBlock(block3));
+          CALL_BF(BF_GetBlock(mainFileDesc2, data2->index[k].tupleId.block_num, block3));
+          data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
+          rec = data3->index[data2->index[k].tupleId.record_num];
+          printf("{%i,%s,%s,%s}\n", rec.id, rec.name, rec.surname, rec.city);
+          CALL_BF(BF_UnpinBlock(block3));
         }
       }
       CALL_BF(BF_UnpinBlock(block2));
