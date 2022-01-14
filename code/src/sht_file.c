@@ -630,6 +630,12 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     return HT_ERROR;
   }
 
+  CALL_BF(BF_UnpinBlock(block));
+  CALL_BF(BF_UnpinBlock(block2));
+
+  BF_Block* block3;
+  BF_Block_Init(&block3);
+
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int i = 0 ; i < indexSize ; i++) {
     CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
@@ -639,7 +645,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
       DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
         if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
-
+          data->index[j].tupleId;
         }
       }
       CALL_BF(BF_UnpinBlock(block2));
@@ -648,6 +654,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   }
   BF_Block_Destroy(&block);
   BF_Block_Destroy(&block2);
+  BF_Block_Destroy(&block3);
 
   return HT_OK;
 }
