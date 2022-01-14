@@ -5,6 +5,9 @@
 #include "bf.h"
 #include "sht_file.h"
 
+#define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index
+#define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(SecondaryRecord))  // Amount of records per bucket
+
 #define CALL_BF(call)       \
 {                           \
   BF_ErrorCode code = call; \
@@ -14,6 +17,27 @@
   }                         \
 }
 
+// Statistical data to be stored in the first block of the file
+typedef struct StatBlock {
+  int total_recs;
+  int total_buckets;
+  int globalDepth;
+} StatBlock;
+
+// Parts of the array to be stored in blocks in the disk
+typedef struct IndexBlock {
+  int nextBlock;
+  int index[INDEX_ARRAY_SIZE];
+} IndexBlock;
+
+// For blocks acting as buckets
+typedef struct DataBlock {
+  int localDepth;
+  int lastEmpty;
+  int nextBlock;
+  Record index[DATA_ARRAY_SIZE];
+} DataBlock;
+
 // Array of open files in memory
 extern OpenFileData open_files[MAX_OPEN_FILES];
 
@@ -22,12 +46,85 @@ HT_ErrorCode SHT_Init() {
   return HT_OK;
 }
 
-HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int attrLength, int depth,char *fileName ) {
+HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int attrLength, int depth, char *fileName) {
   //insert code here
+  // Create block file
+  CALL_BF(BF_CreateFile(sfileName));
+  int fileDesc;
+  // Open file
+  CALL_BF(BF_OpenFile(sfileName, &fileDesc));
+
+  // Initialise statistics block
+  int arraySize = 1 << depth;
+
+  BF_Block* block;
+  BF_Block_Init(&block);
+
+  CALL_BF(BF_AllocateBlock(fileDesc, block));
+
+  StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+
+
+  stat->globalDepth = depth;
+  stat->total_buckets = arraySize;
+  stat->total_recs = 0;
+
+  BF_Block_SetDirty(block);
+  CALL_BF(BF_UnpinBlock(block));
+
+  // Initialise index blocks
+  int indexBlockAmount = ((arraySize - 1) / INDEX_ARRAY_SIZE) + 1;
+  for (int i = 0; i < indexBlockAmount; i++){
+    CALL_BF(BF_AllocateBlock(fileDesc, block));
+    IndexBlock* data = (IndexBlock*) BF_Block_GetData(block);
+    if (i+1 < indexBlockAmount) {
+      data->nextBlock = i+2;
+    }
+    else {
+      data->nextBlock = -1;
+    }
+    BF_Block_SetDirty(block);
+    CALL_BF(BF_UnpinBlock(block));
+  }
+
+  // Initialise buckets
+  for (int i = 0; i < arraySize; i++) {
+    CALL_BF(BF_AllocateBlock(fileDesc, block));
+    DataBlock* dataBlockData = (DataBlock*) BF_Block_GetData(block);
+    dataBlockData->localDepth = depth;
+    dataBlockData->lastEmpty = 0;
+    dataBlockData->nextBlock = -1;
+    BF_Block_SetDirty(block);
+    CALL_BF(BF_UnpinBlock(block));
+  }
+
+  // Map index to buckets
+  int dataBlockCounter = indexBlockAmount + 1;
+  for (int i = 1; i < indexBlockAmount + 1; i++){
+    CALL_BF(BF_GetBlock(fileDesc, i, block));
+    IndexBlock* data = (IndexBlock*) BF_Block_GetData(block);
+    for (int j = 0; j < INDEX_ARRAY_SIZE; j++){
+      if (dataBlockCounter < indexBlockAmount + arraySize + 1) {
+        data->index[j] = dataBlockCounter;
+      }
+      else {
+        data->index[j] = -1;
+      }
+      dataBlockCounter++;      
+    }
+    BF_Block_SetDirty(block);
+    CALL_BF(BF_UnpinBlock(block));
+  }
+
+  BF_Block_Destroy(&block);
+
+  // Close file
+  CALL_BF(BF_CloseFile(fileDesc));
+  return HT_OK;
   return HT_OK;
 }
 
-HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc  ) {
+HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
   //insert code here
   return HT_OK;
 }
