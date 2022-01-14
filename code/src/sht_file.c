@@ -614,22 +614,17 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   // If it is, scan it using the index in the memory
   BF_Block* block;
   BF_Block_Init(&block);
+  BF_Block* block2;
+  BF_Block_Init(&block2);
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int j = 0 ; j < indexSize ; j++) {
     CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[j], block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
-    int nextBlock = data->nextBlock;
+    
     CALL_BF(BF_UnpinBlock(block));
-    while (nextBlock != -1) {
-      CALL_BF(BF_GetBlock(open_files[i].fileDesc, nextBlock, block));
-      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
-      max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
-      min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
-      nextBlock = data->nextBlock;
-      CALL_BF(BF_UnpinBlock(block));
-    }
   }
   BF_Block_Destroy(&block);
+  BF_Block_Destroy(&block2);
 
   return HT_OK;
 }
