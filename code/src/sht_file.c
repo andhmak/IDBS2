@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "bf.h"
 #include "sht_file.h"
@@ -588,7 +589,7 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
   return HT_OK;
 }
 
-HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index-key ) {
+HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key) {
   //insert code here
   return HT_OK;
 }
