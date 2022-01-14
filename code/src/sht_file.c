@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "bf.h"
+#include "hash_file.h"
 #include "sht_file.h"
 
 #define CALL_BF(call)       \
