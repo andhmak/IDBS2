@@ -14,24 +14,6 @@
   }                         \
 }
 
-
-typedef enum HT_ErrorCode {
-  HT_OK,
-  HT_ERROR
-} HT_ErrorCode;
-
-typedef struct Record {
-	int id;
-	char name[15];
-	char surname[20];
-	char city[20];
-} Record;
-
-typedef struct{
-  char index_key[20];
-  int tupleId;  /*Ακέραιος που προσδιορίζει το block και τη θέση μέσα στο block στην οποία     έγινε η εισαγωγή της εγγραφής στο πρωτεύον ευρετήριο.*/ 
-}SecondaryRecord;
-
 // Array of open files in memory
 extern OpenFileData open_files[MAX_OPEN_FILES];
 
