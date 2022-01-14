@@ -657,7 +657,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
       CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hash_string(data->index[j].index_key)], block2));
       DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
-        if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
+        if ((!strcmp(data->index[j].index_key, data2->index[k].index_key)) && ((index_key == NULL) || (!strcmp(data->index[j].index_key, index_key)))) {
           CALL_BF(BF_GetBlock(mainFileDesc1, data->index[j].tupleId.block_num, block3));
           PrimaryDataBlock* data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
           Record rec = data3->index[data->index[j].tupleId.record_num];
