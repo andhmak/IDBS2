@@ -610,5 +610,28 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   if (open_files[sindexDesc2].mainPos != -1) {
     sindexDesc2 = open_files[sindexDesc2].mainPos;
   }
+
+  // If it is, scan it using the index in the memory
+  BF_Block* block;
+  BF_Block_Init(&block);
+  int indexSize = 1 << open_files[sindexDesc1].globalDepth;
+  for (int j = 0 ; j < indexSize ; j++) {
+    CALL_BF(BF_GetBlock(open_files[i].fileDesc, open_files[i].index[j], block));
+    DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+    max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+    min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+    int nextBlock = data->nextBlock;
+    CALL_BF(BF_UnpinBlock(block));
+    while (nextBlock != -1) {
+      CALL_BF(BF_GetBlock(open_files[i].fileDesc, nextBlock, block));
+      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+      max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+      min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+      nextBlock = data->nextBlock;
+      CALL_BF(BF_UnpinBlock(block));
+    }
+  }
+  BF_Block_Destroy(&block);
+
   return HT_OK;
 }
