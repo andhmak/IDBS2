@@ -616,10 +616,8 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   BF_Block_Init(&block);
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int j = 0 ; j < indexSize ; j++) {
-    CALL_BF(BF_GetBlock(open_files[i].fileDesc, open_files[i].index[j], block));
+    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[j], block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
-    max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
-    min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
     int nextBlock = data->nextBlock;
     CALL_BF(BF_UnpinBlock(block));
     while (nextBlock != -1) {
