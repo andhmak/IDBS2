@@ -8,6 +8,8 @@
 
 #define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(SecondaryRecord))  // Amount of records per bucket
+#define MAX_DEPTH (8*sizeof(int)-8) // Maximum global depth of the hash table
+#define SHIFT_CONST (8*sizeof(uint))
 
 #define CALL_BF(call)       \
 {                           \
@@ -40,6 +42,15 @@ typedef struct DataBlock {
   int nextBlock;
   SecondaryRecord index[DATA_ARRAY_SIZE];
 } DataBlock;
+
+uint hash_string(char* string) {
+  uint hash = 5381;
+
+  for (char* s = string; *s != '\0'; s++)
+        hash = (hash * 33)+ *s;
+
+  return hash;
+}
 
 // Array of open files in memory
 extern OpenFileData open_files[MAX_OPEN_FILES];
@@ -300,8 +311,7 @@ HT_ErrorCode SHT_CloseSecondaryIndex(int indexDesc) {
   return HT_OK;
 }
 
-HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
-  // Check if indexDesc valid
+HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {// Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
     printf("Invalied indexDesc\n");
     return HT_ERROR;
@@ -313,7 +323,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
   }
 
   
-  int hashID = ((hash_func(record.id) & INT_MAX) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
+  int hashID = (hash_func(record.index_key) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
 
 
   BF_Block *targetBlock;
@@ -326,85 +336,15 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
     //removed multiblock buckets to simplify the implementation of the secondery index
     printf("This should not be used in project 2");
     return HT_ERROR;
-
-    /*int next = targetData->nextBlock;
-    while(next != -1) {
-      CALL_BF(BF_UnpinBlock(targetBlock));
-      CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, next, targetBlock));
-      targetData = (DataBlock*) BF_Block_GetData(targetBlock);
-      next = targetData->nextBlock;
-    }    
-
-    if (targetData->lastEmpty<DATA_ARRAY_SIZE){ //last block has space
-      //insert
-      targetData->index[targetData->lastEmpty].id = record.id;
-      strcpy(targetData->index[targetData->lastEmpty].name,record.name);
-      strcpy(targetData->index[targetData->lastEmpty].surname,record.surname);
-      strcpy(targetData->index[targetData->lastEmpty].city,record.city);
-      targetData->lastEmpty++;
-      BF_Block_SetDirty(targetBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-
-      CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
-      StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
-      statData->total_recs++;
-      BF_Block_SetDirty(targetBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-      
-      BF_Block_Destroy(&targetBlock);
-
-      return HT_OK;
-    }
-    else{
-      //make next block
-      BF_Block *newBlock;
-      BF_Block_Init(&newBlock);
-      DataBlock *newBlockData;
-      CALL_BF(BF_AllocateBlock(open_files[indexDesc].fileDesc,newBlock));
-      newBlockData = (DataBlock *)BF_Block_GetData(newBlock);
-
-      CALL_BF(BF_GetBlockCounter(open_files[indexDesc].fileDesc,&(targetData->nextBlock)));
-      targetData->nextBlock--;
-      newBlockData->localDepth = targetData->localDepth;
-      newBlockData->index[0].id = record.id;
-      strcpy(newBlockData->index[0].name,record.name);
-      strcpy(newBlockData->index[0].surname,record.surname);
-      strcpy(newBlockData->index[0].city,record.city);
-      newBlockData->lastEmpty = 1;
-      newBlockData->nextBlock = -1;
-
-      BF_Block_SetDirty(targetBlock);
-      BF_Block_SetDirty(newBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-      CALL_BF(BF_UnpinBlock(newBlock));
-
-      CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
-      StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
-      statData->total_recs++;
-      statData->total_buckets++;
-      BF_Block_SetDirty(targetBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-
-      BF_Block_Destroy(&targetBlock);
-      BF_Block_Destroy(&newBlock);
-
-      return HT_OK;
-    }
-    */
   }
   else/*if(targetData->nextBlock==-1)*/{  //only one block
 
     if (targetData->lastEmpty<DATA_ARRAY_SIZE){
       //insert
-      targetData->index[targetData->lastEmpty].id = record.id;
-      strcpy(targetData->index[targetData->lastEmpty].name,record.name);
-      strcpy(targetData->index[targetData->lastEmpty].surname,record.surname);
-      strcpy(targetData->index[targetData->lastEmpty].city,record.city);
+      targetData->index[targetData->lastEmpty].tupleId.block_num = record.tupleId.block_num;
+      targetData->index[targetData->lastEmpty].tupleId.record_num = record.tupleId.record_num;
+      strcpy(targetData->index[targetData->lastEmpty].index_key,record.index_key);      
 
-      tTuple *record_pos;
-      record_pos->block_num = open_files[indexDesc].index[hashID];
-      record_pos->record_num = targetData->lastEmpty;
-      tupleId = (int)record_pos;
 
       targetData->lastEmpty++;
       BF_Block_SetDirty(targetBlock);
@@ -423,67 +363,21 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
     else if(targetData->localDepth==MAX_DEPTH){    //reached MAX depth
       printf("Can't insert record: Block full and index at max depth");
       return HT_ERROR;
-      /*//make next block
-      BF_Block *newBlock;
-      BF_Block_Init(&newBlock);
-      DataBlock *newBlockData;
-      CALL_BF(BF_AllocateBlock(open_files[indexDesc].fileDesc,newBlock));
-      newBlockData = (DataBlock *)BF_Block_GetData(newBlock);
-
-      CALL_BF(BF_GetBlockCounter(open_files[indexDesc].fileDesc,&(targetData->nextBlock)));
-      targetData->nextBlock--;
-      newBlockData->localDepth = targetData->localDepth;
-      newBlockData->index[0].id = record.id;
-      strcpy(newBlockData->index[0].name,record.name);
-      strcpy(newBlockData->index[0].surname,record.surname);
-      strcpy(newBlockData->index[0].city,record.city);
-      newBlockData->lastEmpty = 1;
-      newBlockData->nextBlock = -1;
-
-      BF_Block_SetDirty(targetBlock);
-      BF_Block_SetDirty(newBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-      CALL_BF(BF_UnpinBlock(newBlock));
-
-      CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
-      StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
-      statData->total_recs++;
-      statData->total_buckets++;
-      BF_Block_SetDirty(targetBlock);
-      CALL_BF(BF_UnpinBlock(targetBlock));
-
-      BF_Block_Destroy(&targetBlock);
-      BF_Block_Destroy(&newBlock);
-
-      return HT_OK;*/
     }
     else{
       //split
       //making an array with all the entries of this block
       int entryAmount = 1+targetData->lastEmpty;
-      Record *entryArray=malloc(entryAmount*sizeof(Record));  //1 for the new entry and all the entries of the block
-      updateArray = malloc(entryAmount*sizeof(UpdateRecordArray));
-      entryArray[0].id = record.id;
-      strcpy(entryArray[0].name,record.name);
-      strcpy(entryArray[0].surname,record.surname);
-      strcpy(entryArray[0].city,record.city);
+      SecondaryRecord *entryArray=malloc(entryAmount*sizeof(SecondaryRecord));  //1 for the new entry and all the entries of the block
+      entryArray[0].tupleId.block_num = record.tupleId.block_num;
+      entryArray[0].tupleId.record_num = record.tupleId.record_num;
+      strcpy(entryArray[0].index_key,record.index_key);
 
-      updateArray[0].record = record;
-      updateArray[0].oldTuple = NULL;
 
       for (int i = 0; i < targetData->lastEmpty; i++){
-        entryArray[i+1].id = targetData->index[i].id;
-        strcpy(entryArray[i+1].name,targetData->index[i].name);
-        strcpy(entryArray[i+1].surname,targetData->index[i].surname);
-        strcpy(entryArray[i+1].city,targetData->index[i].city);
-
-        updateArray[i+1].record.id = targetData->index[i].id;
-        strcpy(updateArray[i+1].record.name,targetData->index[i].name);
-        strcpy(updateArray[i+1].record.surname,targetData->index[i].surname);
-        strcpy(updateArray[i+1].record.city,targetData->index[i].city);
-
-        updateArray[i+1].oldTuple->block_num = open_files[indexDesc].index[hashID];
-        updateArray[i+1].oldTuple->record_num = i;
+        entryArray[i+1].tupleId.block_num  = targetData->index[i].tupleId.block_num;
+        entryArray[i+1].tupleId.record_num = targetData->index[i].tupleId.record_num;
+        strcpy(entryArray[i+1].index_key   , targetData->index[i].index_key);
       }
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
       StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
@@ -528,9 +422,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
         free(open_files[indexDesc].index);
         open_files[indexDesc].index=newIndex;
         for (int i=0;i<entryAmount;i++){
-          int temp_tuple;
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],temp_tuple,updateArray);
-          updateArray[i].newTuple = (tTuple *)temp_tuple;
+          HT_SeconderyInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
         }
         free(entryArray);
 
@@ -572,9 +464,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {
         BF_Block_Destroy(&newBlock);
 
         for (int i=0;i<entryAmount;i++){
-          int temp_tuple;
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],temp_tuple,updateArray);
-          updateArray[i].newTuple = (tTuple *)temp_tuple;
+          HT_SecondaryInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
         }
         free(entryArray);
 
@@ -703,7 +593,7 @@ HT_ErrorCode SHT_HashStatistics(char *filename ) {
   return HT_OK;
 }
 
-HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2,  char *index_key) {
-  //insert code here
+HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
+
   return HT_OK;
 }
