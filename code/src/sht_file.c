@@ -323,7 +323,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
   }
 
   
-  int hashID = (hash_func(record.index_key) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
+  int hashID = (hash_string(record.index_key) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
 
 
   BF_Block *targetBlock;
