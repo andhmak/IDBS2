@@ -642,6 +642,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
 
         }
       }
+      CALL_BF(BF_UnpinBlock(block2));
     }
     CALL_BF(BF_UnpinBlock(block));
   }
