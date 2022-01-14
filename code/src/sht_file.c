@@ -595,6 +595,108 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index-key ) {
 
 HT_ErrorCode SHT_HashStatistics(char *filename ) {
   //insert code here
+  // Check if file is open
+  int i;
+  for (i = 0 ; i < MAX_OPEN_FILES ; i++) {
+    if ((strcmp(open_files[i].filename, filename) == 0) && (open_files[i].mainPos == -1)) {
+      break;
+    }
+  }
+  int blockAmount;
+  int bucketAmount;
+  int recordAmount;
+  double average_recs_per_bucket;
+  int max_recs_per_bucket = 0; 
+  int min_recs_per_bucket = INT_MAX;
+
+  // If it is, scan it using the index in the memory
+  if (i != MAX_OPEN_FILES) {
+    CALL_BF(BF_GetBlockCounter(open_files[i].fileDesc, &blockAmount));
+    BF_Block* block;
+    BF_Block_Init(&block);
+    CALL_BF(BF_GetBlock(open_files[i].fileDesc, 0, block));
+    StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+    average_recs_per_bucket = stat->total_recs/ (double) stat->total_buckets;
+    bucketAmount = stat->total_buckets;
+    recordAmount = stat->total_recs;
+    CALL_BF(BF_UnpinBlock(block));
+    int indexSize = 1 << open_files[i].globalDepth;
+    for (int j = 0 ; j < indexSize ; j++) {
+      CALL_BF(BF_GetBlock(open_files[i].fileDesc, open_files[i].index[j], block));
+      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+      max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+      min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+      int nextBlock = data->nextBlock;
+      CALL_BF(BF_UnpinBlock(block));
+      while (nextBlock != -1) {
+        CALL_BF(BF_GetBlock(open_files[i].fileDesc, nextBlock, block));
+        DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+        max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+        min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+        nextBlock = data->nextBlock;
+        CALL_BF(BF_UnpinBlock(block));
+      }
+    }
+    BF_Block_Destroy(&block);
+  }
+
+  // Else, scan it using the index in the disk
+  else {
+    // Open file
+    int fd;
+    CALL_BF(BF_OpenFile(filename, &fd));
+    // Scan it
+    CALL_BF(BF_GetBlockCounter(fd, &blockAmount));
+    BF_Block* block;
+    BF_Block_Init(&block);
+    CALL_BF(BF_GetBlock(fd, 0, block));
+    StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+    average_recs_per_bucket = stat->total_recs/ (double) stat->total_buckets;
+    bucketAmount = stat->total_buckets;
+    recordAmount = stat->total_recs;
+    
+    CALL_BF(BF_UnpinBlock(block));
+    BF_Block* indexBlock;
+    BF_Block_Init(&indexBlock);
+    CALL_BF(BF_GetBlock(fd, 1, indexBlock));
+    IndexBlock* index = (IndexBlock*) BF_Block_GetData(indexBlock);
+    int nextIndexBlock;
+    do {
+      for (int j = 0 ; (j < INDEX_ARRAY_SIZE) && (index->index[j] != -1); j++) {
+        CALL_BF(BF_GetBlock(fd, index->index[j], block));
+        DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+        max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+        min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+        int nextBlock = data->nextBlock;
+        CALL_BF(BF_UnpinBlock(block));
+        while (nextBlock != -1) {
+          CALL_BF(BF_GetBlock(fd, nextBlock, block));
+          DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+          max_recs_per_bucket = (data->lastEmpty > max_recs_per_bucket) ? data->lastEmpty : max_recs_per_bucket;
+          min_recs_per_bucket = (data->lastEmpty < min_recs_per_bucket) ? data->lastEmpty : min_recs_per_bucket;
+          nextBlock = data->nextBlock;
+          CALL_BF(BF_UnpinBlock(block));
+        }
+      }
+      nextIndexBlock = index->nextBlock;
+      CALL_BF(BF_UnpinBlock(indexBlock));
+      if (nextIndexBlock != -1) {
+        CALL_BF(BF_GetBlock(fd, nextIndexBlock, indexBlock));
+        index = (IndexBlock*) BF_Block_GetData(indexBlock);
+      }
+    } while (nextIndexBlock != -1);
+
+    BF_Block_Destroy(&indexBlock);
+    BF_Block_Destroy(&block);
+    // Close file
+    CALL_BF(BF_CloseFile(fd));
+  }
+
+  // Print the results
+  printf("Block amount: %d\n", blockAmount);
+  printf("Minimum records per bucket: %d\n", min_recs_per_bucket);
+  printf("Average records per bucket: %f\n", average_recs_per_bucket);
+  printf("Maximum records per bucket: %d\n", max_recs_per_bucket);
   return HT_OK;
 }
 
