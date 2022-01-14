@@ -530,7 +530,7 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
   else{
 
     printf("Printing entries with ID: %s\n", index_key);
-    int hashID = ((hash_func(index_key) & INT_MAX )>>(SHIFT_CONST - open_files[sindexDesc].globalDepth));
+    int hashID = hash_string(index_key) >> (SHIFT_CONST - open_files[sindexDesc].globalDepth);
     BF_Block *targetBlock;
     BF_Block_Init(&targetBlock);
     CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[hashID],targetBlock));
@@ -538,7 +538,7 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
 
     for (int i = 0; i < targetData->lastEmpty; i++){
       if (strcmp(index_key,targetData->index[i].index_key)){
-        //printf("{%i,%s,%s,%s}\n", targetData->index[i].id, targetData->index[i].name, targetData->index[i].surname, targetData->index[i].city);
+        printf("{%i,%s,%s,%s}\n", targetData->index[i].id, targetData->index[i].name, targetData->index[i].surname, targetData->index[i].city);
       }
     }
     
