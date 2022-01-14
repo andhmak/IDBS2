@@ -630,10 +630,12 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     return HT_ERROR;
   }
 
-  char mainFileName1[NAME_BUF];
-  char mainFileName2[NAME_BUF];
-  strcpy(mainFileName1, stat1->mainFileName);
-  strcpy(mainFileName2, stat2->mainFileName);
+
+
+  int mainFileDesc1;
+  int mainFileDesc2;
+  CALL_BF(BF_OpenFile(stat1->mainFileName, &mainFileDesc1));
+  CALL_BF(BF_OpenFile(stat2->mainFileName, &mainFileDesc2));
 
   CALL_BF(BF_UnpinBlock(block));
   CALL_BF(BF_UnpinBlock(block2));
