@@ -67,7 +67,7 @@ HT_ErrorCode HT_CloseFile(
 HT_ErrorCode HT_InsertEntry(
 	int indexDesc,	/* θέση στον πίνακα με τα ανοιχτά αρχεία */
 	Record record,		/* δομή που προσδιορίζει την εγγραφή */
-	tTuple* tupleId,
+	tTuple *tupleId,
 	UpdateRecordArray *updateArray
 	);
 
