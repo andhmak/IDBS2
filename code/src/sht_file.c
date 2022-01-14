@@ -13,7 +13,7 @@
   BF_ErrorCode code = call; \
   if (code != BF_OK) {         \
     BF_PrintError(code);    \
-    return HP_ERROR;        \
+    return HT_ERROR;        \
   }                         \
 }
 
@@ -22,6 +22,7 @@ typedef struct StatBlock {
   int total_recs;
   int total_buckets;
   int globalDepth;
+  char* attribName;
 } StatBlock;
 
 // Parts of the array to be stored in blocks in the disk
@@ -68,6 +69,8 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
   stat->globalDepth = depth;
   stat->total_buckets = arraySize;
   stat->total_recs = 0;
+  stat->attribName = malloc(attrLength*sizeof(char));
+  strcpy(stat->attribName, attrName);
 
   BF_Block_SetDirty(block);
   CALL_BF(BF_UnpinBlock(block));
