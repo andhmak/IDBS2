@@ -489,8 +489,62 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
   return HT_OK;
 }
 
-HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key) {
-  //insert code here
+HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
+  // Check if indexDesc valid
+  if ((sindexDesc < 0) || (sindexDesc >= MAX_OPEN_FILES) || (open_files[sindexDesc].fileDesc == -1)) {
+    printf("Invalied indexDesc\n");
+    return HT_ERROR;
+  }
+
+  // Check if secondary entry
+  if (open_files[sindexDesc].mainPos != -1) {
+    sindexDesc = open_files[sindexDesc].mainPos;
+  }
+  
+  if (index_key==NULL){
+    printf("Printing all entries\n");
+    
+    BF_Block *targetBlock;
+    BF_Block_Init(&targetBlock);
+
+    int previous_bucket = -1;
+    int current_bucket = -1;
+    for (int i=0;i<(1<<open_files[sindexDesc].globalDepth);i++){
+      current_bucket = open_files[sindexDesc].index[i];
+      if (current_bucket == previous_bucket) {
+        previous_bucket = current_bucket;
+        continue;
+      }
+      previous_bucket = current_bucket;
+      CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[i],targetBlock));
+      DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
+
+      for (int j = 0; j < targetData->lastEmpty; j++){
+        //printf("{%i,%s,%s,%s}\n", targetData->index[j].id, targetData->index[j].name, targetData->index[j].surname, targetData->index[j].city);
+      }
+      
+      CALL_BF(BF_UnpinBlock(targetBlock));
+    }
+    BF_Block_Destroy(&targetBlock);
+  }
+  else{
+
+    printf("Printing entries with ID: %s\n", index_key);
+    int hashID = ((hash_func(index_key) & INT_MAX )>>(SHIFT_CONST - open_files[sindexDesc].globalDepth));
+    BF_Block *targetBlock;
+    BF_Block_Init(&targetBlock);
+    CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[hashID],targetBlock));
+    DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
+
+    for (int i = 0; i < targetData->lastEmpty; i++){
+      if (strcmp(index_key,targetData->index[i].index_key)){
+        //printf("{%i,%s,%s,%s}\n", targetData->index[i].id, targetData->index[i].name, targetData->index[i].surname, targetData->index[i].city);
+      }
+    }
+    
+    CALL_BF(BF_UnpinBlock(targetBlock));
+    BF_Block_Destroy(&targetBlock);
+  }
   return HT_OK;
 }
 
