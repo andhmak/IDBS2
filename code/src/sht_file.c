@@ -486,7 +486,7 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key) {
   return HT_OK;
 }
 
-HT_ErrorCode SHT_HashStatistics(char *filename ) {
+HT_ErrorCode SHT_HashStatistics(char *filename) {
   //insert code here
   // Check if file is open
   int i;
@@ -594,6 +594,10 @@ HT_ErrorCode SHT_HashStatistics(char *filename ) {
 }
 
 HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
-
+  if (((sindexDesc1 < 0) || (sindexDesc1 >= MAX_OPEN_FILES) || (open_files[sindexDesc1].fileDesc == -1))
+  ||  ((sindexDesc2 < 0) || (sindexDesc2 >= MAX_OPEN_FILES) || (open_files[sindexDesc2].fileDesc == -1))) {
+    printf("Invalied indexDesc\n");
+    return HT_ERROR;
+  }
   return HT_OK;
 }
