@@ -1,6 +1,7 @@
 #ifndef HASH_FILE_H
 #define HASH_FILE_H
 #define MAX_OPEN_FILES 20
+#define NAME_BUF 100
 
 typedef enum HT_ErrorCode {
   HT_OK,
@@ -24,6 +25,15 @@ typedef struct update{
   tTuple *newTuple;
   tTuple *oldTuple;
 } UpdateRecordArray;
+
+// Data to be held in memory for each open file
+typedef struct OpenFileData {
+  int mainPos;
+  char filename[NAME_BUF];
+  int fileDesc;
+  int globalDepth;
+  int *index;
+} OpenFileData;
 
 /*
  * Η συνάρτηση HT_Init χρησιμοποιείται για την αρχικοποίηση κάποιον δομών που μπορεί να χρειαστείτε. 

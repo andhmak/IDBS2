@@ -5,7 +5,6 @@
 
 #include "bf.h"
 #include "hash_file.h"
-#define NAME_BUF 100
 
 #define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))  // Amount of records per bucket
@@ -48,15 +47,6 @@ typedef struct DataBlock {
   int nextBlock;
   Record index[DATA_ARRAY_SIZE];
 } DataBlock;
-
-// Data to be held in memory for each open file
-typedef struct OpenFileData {
-  int mainPos;
-  char filename[NAME_BUF];
-  int fileDesc;
-  int globalDepth;
-  int *index;
-} OpenFileData;
 
 // Array of open files in memory
 OpenFileData open_files[MAX_OPEN_FILES];
