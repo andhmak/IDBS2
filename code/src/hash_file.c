@@ -306,7 +306,7 @@ HT_ErrorCode HT_CloseFile(int indexDesc) {
   return HT_OK;
 }
 
-HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, int tupleId, UpdateRecordArray *updateArray) {
+HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, UpdateRecordArray *updateArray) {
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
     printf("Invalied indexDesc\n");
@@ -407,10 +407,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, int tupleId, UpdateRec
       strcpy(targetData->index[targetData->lastEmpty].surname,record.surname);
       strcpy(targetData->index[targetData->lastEmpty].city,record.city);
 
-      tTuple *record_pos;
-      record_pos->block_num = open_files[indexDesc].index[hashID];
-      record_pos->record_num = targetData->lastEmpty;
-      tupleId = (int)record_pos;
+      tupleId->block_num = open_files[indexDesc].index[hashID];
+      tupleId->record_num = targetData->lastEmpty;
 
       targetData->lastEmpty++;
       BF_Block_SetDirty(targetBlock);
