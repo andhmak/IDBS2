@@ -594,10 +594,21 @@ HT_ErrorCode SHT_HashStatistics(char *filename) {
 }
 
 HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
+  // Check if indexDesc valid
   if (((sindexDesc1 < 0) || (sindexDesc1 >= MAX_OPEN_FILES) || (open_files[sindexDesc1].fileDesc == -1))
   ||  ((sindexDesc2 < 0) || (sindexDesc2 >= MAX_OPEN_FILES) || (open_files[sindexDesc2].fileDesc == -1))) {
     printf("Invalied indexDesc\n");
     return HT_ERROR;
+  }
+
+  // Check if secondary entry
+  if (open_files[sindexDesc1].mainPos != -1) {
+    sindexDesc1 = open_files[sindexDesc1].mainPos;
+  }
+
+  // Check if secondary entry
+  if (open_files[sindexDesc2].mainPos != -1) {
+    sindexDesc2 = open_files[sindexDesc2].mainPos;
   }
   return HT_OK;
 }
