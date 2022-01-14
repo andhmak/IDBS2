@@ -22,7 +22,7 @@ typedef struct StatBlock {
   int total_recs;
   int total_buckets;
   int globalDepth;
-  char* attribName;
+  int attribType;  // 0 for city, 1 for surname
 } StatBlock;
 
 // Parts of the array to be stored in blocks in the disk
@@ -69,8 +69,17 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
   stat->globalDepth = depth;
   stat->total_buckets = arraySize;
   stat->total_recs = 0;
-  stat->attribName = malloc(attrLength*sizeof(char));
-  strcpy(stat->attribName, attrName);
+  if (!strcmp(attrName, "city")) {
+    stat->attribType = 0;
+  }
+  else if (!strcmp(attrName, "surname")) {
+    stat->attribType = 1;
+  }
+  else {
+    fprintf(stderr, "No such attribute");
+    CALL_BF(BF_CloseFile(fileDesc));
+    return HT_ERROR;
+  }
 
   BF_Block_SetDirty(block);
   CALL_BF(BF_UnpinBlock(block));
