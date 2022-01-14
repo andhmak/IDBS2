@@ -700,7 +700,7 @@ HT_ErrorCode SHT_HashStatistics(char *filename ) {
   return HT_OK;
 }
 
-HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2,  char *index-key ) {
+HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2,  char *index_key) {
   //insert code here
   return HT_OK;
 }
