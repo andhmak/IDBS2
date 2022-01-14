@@ -1,5 +1,5 @@
-#ifndef HASH_FILE_H
-#define HASH_FILE_H
+#ifndef HASH_FILE_H2
+#define HASH_FILE_H2
 
 #include "hash_file.h"
 
