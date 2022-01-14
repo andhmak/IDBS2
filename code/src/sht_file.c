@@ -538,7 +538,7 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
 
     for (int i = 0; i < targetData->lastEmpty; i++){
       if (strcmp(index_key,targetData->index[i].index_key)){
-        printf("{%i,%s,%s,%s}\n", targetData->index[i].id, targetData->index[i].name, targetData->index[i].surname, targetData->index[i].city);
+        //printf("{%i,%s,%s,%s}\n", targetData->index[i].id, targetData->index[i].name, targetData->index[i].surname, targetData->index[i].city);
       }
     }
     
