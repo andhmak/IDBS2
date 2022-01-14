@@ -36,7 +36,7 @@ typedef struct DataBlock {
   int localDepth;
   int lastEmpty;
   int nextBlock;
-  Record index[DATA_ARRAY_SIZE];
+  SecondaryRecord index[DATA_ARRAY_SIZE];
 } DataBlock;
 
 // Array of open files in memory
