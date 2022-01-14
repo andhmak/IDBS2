@@ -5,7 +5,6 @@
 
 #include "bf.h"
 #include "hash_file.h"
-#define MAX_OPEN_FILES 20
 #define NAME_BUF 100
 
 #define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index

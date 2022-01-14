@@ -1,5 +1,6 @@
 #ifndef HASH_FILE_H
 #define HASH_FILE_H
+#define MAX_OPEN_FILES 20
 
 typedef enum HT_ErrorCode {
   HT_OK,
