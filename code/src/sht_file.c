@@ -619,6 +619,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     sindexDesc2 = open_files[sindexDesc2].mainPos;
   }
 
+  // Check if same attribute
   BF_Block* block;
   BF_Block_Init(&block);
   BF_Block* block2;
@@ -628,7 +629,6 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   StatBlock* stat1 = (StatBlock*) BF_Block_GetData(block);
   CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, 0, block2));
   StatBlock* stat2 = (StatBlock*) BF_Block_GetData(block2);
-
   if (stat1->attribType != stat2->attribType) {
     printf("Incompatible attribute types\n");
     CALL_BF(BF_UnpinBlock(block));
@@ -638,6 +638,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     return HT_ERROR;
   }
 
+  // Get main files
   int mainFileDesc1;
   int mainFileDesc2;
   CALL_BF(BF_OpenFile(stat1->mainFileName, &mainFileDesc1));
@@ -646,6 +647,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   CALL_BF(BF_UnpinBlock(block));
   CALL_BF(BF_UnpinBlock(block2));
 
+  // Join
   BF_Block* block3;
   BF_Block_Init(&block3);
 
