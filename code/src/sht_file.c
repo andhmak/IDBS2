@@ -630,8 +630,6 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     return HT_ERROR;
   }
 
-
-
   int mainFileDesc1;
   int mainFileDesc2;
   CALL_BF(BF_OpenFile(stat1->mainFileName, &mainFileDesc1));
@@ -652,7 +650,10 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
       DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
         if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
-          data->index[j].tupleId;
+          CALL_BF(BF_GetBlock(mainFileDesc1, data->index[j].tupleId.block_num, block3));
+          DataBlock* data3 = (DataBlock*) BF_Block_GetData(block3);
+          data3->index[data->index[j].tupleId.record_num];
+          printf("", )
         }
       }
       CALL_BF(BF_UnpinBlock(block2));
