@@ -1,3 +1,7 @@
+secondary_main: secondary_main.o hash_file.o
+	@echo " Compile secondary_main ...";
+	gcc -L ./lib/ -Wl,-rpath,./lib/ ./build/secondary_main.o ./build/hash_file.o -lbf -o ./bin/runner
+
 error_main: error_main.o hash_file.o
 	@echo " Compile error_main ...";
 	gcc -L ./lib/ -Wl,-rpath,./lib/ ./build/error_main.o ./build/hash_file.o -lbf -o ./bin/runner
@@ -13,6 +17,10 @@ main.o:
 error_main.o:
 	@echo " Compile main ...";
 	gcc -I ./include/ -c -o ./build/error_main.o ./src/error_main.c -O2
+
+secondary_main.o:
+	@echo " Compile main ...";
+	gcc -I ./include/ -c -o ./build/secondary_main.o ./src/secondary_main.c -O2
 
 hash_file.o:
 	@echo " Compile main ...";

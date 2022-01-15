@@ -86,12 +86,17 @@ int main() {
     exit(1);
   }
   int indexDesc1;
+  tTuple rec_pos;
+  UpdateRecordArray updateArray;
   switch(r) {
     case 1:
       CALL_OR_DIE(HT_CloseFile(0));
       break;
     case 2:
-      CALL_OR_DIE(HT_InsertEntry(0, record));
+      CALL_OR_DIE(HT_InsertEntry(0, record, &rec_pos, &updateArray));
+      free(updateArray.record);
+      free(updateArray.newTuple);
+      free(updateArray.oldTuple);
       break;
     case 3:
       CALL_OR_DIE(HT_PrintAllEntries(0, NULL));

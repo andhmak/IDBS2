@@ -532,6 +532,7 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
       CALL_BF(BF_UnpinBlock(block));
     }
   }
+  
   return HT_OK;
 }
 
