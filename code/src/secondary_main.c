@@ -3,7 +3,6 @@
 #include <string.h>
 #include <time.h>
 #include "bf.h"
-#include "hash_file.h"
 #include "sht_file.h"
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
