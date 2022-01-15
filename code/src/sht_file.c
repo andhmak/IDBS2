@@ -486,6 +486,10 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
 }
 
 HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateArray) {
+  if (updateArray->record == NULL) {
+    return HT_OK;
+  }
+
   BF_Block* block;
   BF_Block_Init(&block);
 

@@ -113,6 +113,7 @@ int main() {
 
   printf("Close the first file\n");
   CALL_OR_DIE(HT_CloseFile(indexDesc1));
+  CALL_OR_DIE(SHT_CloseSecondaryIndex(indexDesc2));
   printf("RUN HashStatistics on the first closed file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_1));
   BF_Close();
