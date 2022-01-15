@@ -476,18 +476,26 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
       printf("Before for\n");
       fflush(stdout);
       for (int i = 0; i < targetData->lastEmpty; i++){
+        printf("%i\n",i);
+        fflush(stdout);
         entryArray[i+1].id = targetData->index[i].id;
         strcpy(entryArray[i+1].name,targetData->index[i].name);
         strcpy(entryArray[i+1].surname,targetData->index[i].surname);
         strcpy(entryArray[i+1].city,targetData->index[i].city);
+        printf("1\n");
+        fflush(stdout);
 
         updateArray[i+1].record.id = targetData->index[i].id;
         strcpy(updateArray[i+1].record.name,targetData->index[i].name);
         strcpy(updateArray[i+1].record.surname,targetData->index[i].surname);
         strcpy(updateArray[i+1].record.city,targetData->index[i].city);
 
+        printf("2\n");
+        fflush(stdout);
         updateArray[i+1].oldTuple->block_num = open_files[indexDesc].index[hashID];
         updateArray[i+1].oldTuple->record_num = i;
+        printf("3\n");
+        fflush(stdout);
       }
       printf("After for\n");
       fflush(stdout);
