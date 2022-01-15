@@ -782,7 +782,8 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
     for (int j = 0 ; j < data->lastEmpty ; j++) {
-      CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hash_string(data->index[j].index_key)], block2));
+      int hashID = hash_string(data->index[j].index_key) >> (SHIFT_CONST - open_files[sindexDesc2].globalDepth);
+      CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hashID], block2));
       DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
         if ((!strcmp(data->index[j].index_key, data2->index[k].index_key)) && ((index_key == NULL) || (!strcmp(data->index[j].index_key, index_key)))) {
