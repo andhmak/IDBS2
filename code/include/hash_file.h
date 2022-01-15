@@ -20,8 +20,8 @@ typedef struct tTuple {
 
 typedef struct update{
   Record record;
-  tTuple *newTuple;
-  tTuple *oldTuple;
+  tTuple newTuple;
+  tTuple oldTuple;
 } UpdateRecordArray;
 
 // Data to be held in memory for each open file
