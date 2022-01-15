@@ -6,7 +6,7 @@
 #include "sht_file.h"
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
-#define RECORDS_NUM 128 // you can change it if you want
+#define RECORDS_NUM 64 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
 #define GLOBAL_DEPT_2 2 // you can change it if you want
 #define FILE_NAME_1 "data_1.db"
@@ -120,6 +120,7 @@ int main() {
   printf("RUN HashStatistics on the secondary open file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_2));
 
+  CALL_OR_DIE(SHT_InnerJoin(indexDesc2, indexDesc2, "Ioannidis"));
 
   printf("Close the first file\n");
   CALL_OR_DIE(HT_CloseFile(indexDesc1));
