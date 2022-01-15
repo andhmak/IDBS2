@@ -6,7 +6,7 @@
 #include "sht_file.h"
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
-#define RECORDS_NUM 64 // you can change it if you want
+#define RECORDS_NUM 128 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
 #define GLOBAL_DEPT_2 2 // you can change it if you want
 #define FILE_NAME_1 "data_1.db"
@@ -68,12 +68,15 @@ int main() {
   BF_Init(LRU);
   CALL_OR_DIE(HT_Init());
 
-  printf("Create the first file with a small initial depth and open it once\n");
-  int indexDesc1;
-  int indexDesc2;
+  printf("Create the primary file\n");
   CALL_OR_DIE(HT_CreateIndex(FILE_NAME_1, GLOBAL_DEPT_1));
+  printf("Create the secondary file\n");
   CALL_OR_DIE(SHT_CreateSecondaryIndex(FILE_NAME_2, "surname", 20, GLOBAL_DEPT_2, FILE_NAME_1));
+  printf("Open the primary file\n");
+  int indexDesc1;
   CALL_OR_DIE(HT_OpenIndex(FILE_NAME_1, &indexDesc1));
+  printf("Open the secondary file\n");
+  int indexDesc2;
   CALL_OR_DIE(SHT_OpenSecondaryIndex(FILE_NAME_2, &indexDesc2));
   Record record;
   SecondaryRecord secRecord;
@@ -85,12 +88,12 @@ int main() {
   for (int id = 0; id < RECORDS_NUM; ++id) {
     // create a record
     record.id = id;
-    r = rand() % 12;
+    r = id % 12;
     memcpy(record.name, names[r], strlen(names[r]) + 1);
-    r = rand() % 12;
+    r = id % 12;
     memcpy(record.surname, surnames[r], strlen(surnames[r]) + 1);
     memcpy(secRecord.index_key, surnames[r], strlen(surnames[r]) + 1);
-    r = rand() % 10;
+    r = id % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
     CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
     secRecord.tupleId.block_num = rec_pos.block_num;
@@ -104,14 +107,14 @@ int main() {
   
   printf("RUN PrintAllEntries with specific ID on the first file\n");
   int id = rand() % RECORDS_NUM;
-  //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &id));
+  CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &id));
   printf("RUN PrintAllEntries with specific ID on the secondary file\n");
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, "Ioannidis"));
   for (int i = 0; i < RECORDS_NUM; i++) {
-    //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &i));
+    CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &i));
   }
   printf("RUN PrintAllEntries without ID on the first file\n");
-  //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, NULL));
+  CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, NULL));
   printf("RUN PrintAllEntries without ID on the secondary file\n");
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, NULL));
 
