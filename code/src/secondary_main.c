@@ -102,8 +102,8 @@ int main() {
     CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
     secRecord.tupleId.block_num = rec_pos.block_num;
     secRecord.tupleId.record_num = rec_pos.record_num;
-    CALL_OR_DIE(SHT_SecondaryInsertEntry(indexDesc2, secRecord));
-    CALL_OR_DIE(SHT_SecondaryUpdateEntry(indexDesc2, &updateArray));
+    //CALL_OR_DIE(SHT_SecondaryInsertEntry(indexDesc2, secRecord));
+    //CALL_OR_DIE(SHT_SecondaryUpdateEntry(indexDesc2, &updateArray));
     CALL_OR_DIE(SHT_SecondaryInsertEntry(indexDesc3, secRecord));
     CALL_OR_DIE(SHT_SecondaryUpdateEntry(indexDesc3, &updateArray));
     free(updateArray.record);
