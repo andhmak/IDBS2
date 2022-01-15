@@ -6,9 +6,9 @@
 #include "sht_file.h"
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
-#define RECORDS_NUM 256 // you can change it if you want
+#define RECORDS_NUM 64 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
-#define GLOBAL_DEPT_2 2 // you can change it if you want
+#define GLOBAL_DEPT_2 10 // you can change it if you want
 #define FILE_NAME_1 "data_1.db"
 #define FILE_NAME_2 "data_2.db"
 
@@ -113,11 +113,15 @@ int main() {
   printf("RUN PrintAllEntries with specific ID on the first file\n");
   int id = rand() % RECORDS_NUM;
   CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &id));
+  printf("RUN PrintAllEntries with specific ID on the secondary file\n");
+  CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, "Ioannidis"));
   for (int i = 0; i < RECORDS_NUM; i++) {
     CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &i));
   }
   printf("RUN PrintAllEntries without ID on the first file\n");
   CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, NULL));
+  printf("RUN PrintAllEntries without ID on the secondary file\n");
+  CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, NULL));
 
   printf("RUN HashStatistics on the first open file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_1));
