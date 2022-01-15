@@ -485,8 +485,33 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
   return HT_OK;
 }
 
-HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateArray ) {
-  //insert code here
+// Statistical data to be stored in the first block of the file
+typedef struct StatBlock {
+  int total_recs;
+  int total_buckets;
+  int globalDepth;
+  int attribType;  // 0 for city, 1 for surname
+  char mainFileName[NAME_BUF];
+} StatBlock;
+
+HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateArray) {
+  BF_Block* block;
+  BF_Block_Init(&block);
+
+  CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, block));
+  StatBlock* stat = (StatBlock*) BF_Block_GetData(block);
+
+  if (stat->attribType == 0) {
+    CALL_BF(BF_UnpinBlock(block));
+  }
+
+  if (stat->attribType == 1) {
+    CALL_BF(BF_UnpinBlock(block));
+  }
+
+  for (int i = 0 ; i < PRIMARY_DATA_ARRAY_SIZE ; i++) {
+    open_files[indexDesc].index
+  }
   return HT_OK;
 }
 
