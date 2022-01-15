@@ -540,22 +540,24 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
     printf("Invalied indexDesc\n");
     return HT_ERROR;
   }
-
   // Check if secondary entry
   if (open_files[sindexDesc].mainPos != -1) {
     sindexDesc = open_files[sindexDesc].mainPos;
   }
   
+  BF_Block *targetBlock;
+  BF_Block_Init(&targetBlock);
+  BF_Block *Stat;
+  BF_Block_Init(&Stat);
+  BF_Block *mainTargetBlock;
+  BF_Block_Init(&mainTargetBlock);
+
   if (index_key==NULL){
     printf("Printing all entries\n");
     
-    BF_Block *targetBlock;
-    BF_Block_Init(&targetBlock);
-
     int previous_bucket = -1;
     int current_bucket = -1;
-
-    BF_Block *Stat;
+    
     CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,0,Stat));
     StatBlock *stats = (StatBlock *)BF_Block_GetData(Stat);
 
@@ -571,40 +573,30 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
       previous_bucket = current_bucket;
       CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[i],targetBlock));
       DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
-
       for (int j = 0; j < targetData->lastEmpty; j++){
-        BF_Block *mainTargetBlock;
         CALL_BF(BF_GetBlock(indexDesc,targetData->index[j].tupleId.block_num,mainTargetBlock));
         PrimaryDataBlock *mainTargetData = (PrimaryDataBlock *)BF_Block_GetData(mainTargetBlock);
-
         int k = targetData->index[j].tupleId.record_num;
         printf("{%i,%s,%s,%s}\n", mainTargetData->index[k].id, mainTargetData->index[k].name, mainTargetData->index[k].surname, mainTargetData->index[k].city);
         CALL_BF(BF_UnpinBlock(mainTargetBlock));
       }
-      
       CALL_BF(BF_UnpinBlock(targetBlock));
     }
-    BF_Block_Destroy(&targetBlock);
   }
   else{
 
-    BF_Block *Stat;
     CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,0,Stat));
     StatBlock *stats = (StatBlock *)BF_Block_GetData(Stat);
-
     int indexDesc;
     CALL_BF(BF_OpenFile(stats->mainFileName,&indexDesc))
 
     printf("Printing entries with ID: %s\n", index_key);
     int hashID = hash_string(index_key) >> (SHIFT_CONST - open_files[sindexDesc].globalDepth);
-    BF_Block *targetBlock;
-    BF_Block_Init(&targetBlock);
     CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[hashID],targetBlock));
     DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
 
     for (int i = 0; i < targetData->lastEmpty; i++){
       if (strcmp(index_key,targetData->index[i].index_key)){
-        BF_Block *mainTargetBlock;
         CALL_BF(BF_GetBlock(indexDesc,targetData->index[i].tupleId.block_num,mainTargetBlock));
         PrimaryDataBlock *mainTargetData = (PrimaryDataBlock *)BF_Block_GetData(mainTargetBlock);
 
@@ -612,11 +604,17 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
         printf("{%i,%s,%s,%s}\n", mainTargetData->index[k].id, mainTargetData->index[k].name, mainTargetData->index[k].surname, mainTargetData->index[k].city);
         CALL_BF(BF_UnpinBlock(mainTargetBlock));
       }
+      
     }
-    
     CALL_BF(BF_UnpinBlock(targetBlock));
-    BF_Block_Destroy(&targetBlock);
+    
   }
+
+  CALL_BF(BF_UnpinBlock(Stat));
+  BF_Block_Destroy(&Stat);
+  BF_Block_Destroy(&targetBlock);
+  BF_Block_Destroy(&mainTargetBlock);
+
   return HT_OK;
 }
 
