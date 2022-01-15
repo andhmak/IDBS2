@@ -1,4 +1,4 @@
-secondary_main: secondary_main.o hash_file.o
+secondary_main: secondary_main.o hash_file.o sht_file.o
 	@echo " Compile secondary_main ...";
 	gcc -L ./lib/ -Wl,-rpath,./lib/ ./build/secondary_main.o ./build/hash_file.o -lbf -o ./bin/runner
 
@@ -25,6 +25,10 @@ secondary_main.o:
 hash_file.o:
 	@echo " Compile main ...";
 	gcc -I ./include/ -c -o ./build/hash_file.o ./src/hash_file.c -O2
+
+sht_file.o:
+	@echo " Compile main ...";
+	gcc -I ./include/ -c -o ./build/sht_file.o ./src/sht_file.c -O2
 
 ht: 
 	@echo " Compile ht_main ...";
