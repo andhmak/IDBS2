@@ -112,14 +112,14 @@ int main() {
   
   printf("RUN PrintAllEntries with specific ID on the first file\n");
   int id = rand() % RECORDS_NUM;
-  CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &id));
+  //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &id));
   printf("RUN PrintAllEntries with specific ID on the secondary file\n");
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, "Ioannidis"));
   for (int i = 0; i < RECORDS_NUM; i++) {
-    CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &i));
+    //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, &i));
   }
   printf("RUN PrintAllEntries without ID on the first file\n");
-  CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, NULL));
+  //CALL_OR_DIE(HT_PrintAllEntries(indexDesc1, NULL));
   printf("RUN PrintAllEntries without ID on the secondary file\n");
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, NULL));
 

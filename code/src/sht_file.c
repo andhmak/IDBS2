@@ -537,7 +537,7 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
 HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
   // Check if indexDesc valid
   if ((sindexDesc < 0) || (sindexDesc >= MAX_OPEN_FILES) || (open_files[sindexDesc].fileDesc == -1)) {
-    printf("Invalied indexDesc\n");
+    printf("Invalid indexDesc\n");
     return HT_ERROR;
   }
   // Check if secondary entry
@@ -590,13 +590,13 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
     int indexDesc;
     CALL_BF(BF_OpenFile(stats->mainFileName,&indexDesc))
 
-    printf("Printing entries with ID: %s\n", index_key);
+    printf("Printing entries with key: %s\n", index_key);
     int hashID = hash_string(index_key) >> (SHIFT_CONST - open_files[sindexDesc].globalDepth);
     CALL_BF(BF_GetBlock(open_files[sindexDesc].fileDesc,open_files[sindexDesc].index[hashID],targetBlock));
     DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
 
     for (int i = 0; i < targetData->lastEmpty; i++){
-      if (strcmp(index_key,targetData->index[i].index_key)){
+      if (!strcmp(index_key,targetData->index[i].index_key)){
         CALL_BF(BF_GetBlock(indexDesc,targetData->index[i].tupleId.block_num,mainTargetBlock));
         PrimaryDataBlock *mainTargetData = (PrimaryDataBlock *)BF_Block_GetData(mainTargetBlock);
 
