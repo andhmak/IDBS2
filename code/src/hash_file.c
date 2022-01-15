@@ -473,6 +473,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
       updateArray[0].record = record;
       updateArray[0].oldTuple = NULL;
 
+      printf("Before for\n");
+      fflush(stdout);
       for (int i = 0; i < targetData->lastEmpty; i++){
         entryArray[i+1].id = targetData->index[i].id;
         strcpy(entryArray[i+1].name,targetData->index[i].name);
@@ -487,6 +489,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         updateArray[i+1].oldTuple->block_num = open_files[indexDesc].index[hashID];
         updateArray[i+1].oldTuple->record_num = i;
       }
+      printf("After for\n");
+      fflush(stdout);
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, 0, targetBlock));
       StatBlock* statData = (StatBlock*) BF_Block_GetData(targetBlock);
       statData->total_buckets++;
@@ -494,8 +498,11 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
       BF_Block_SetDirty(targetBlock);
       CALL_BF(BF_UnpinBlock(targetBlock));
 
+      printf("General split end reached\n");
+      fflush(stdout);
+
       if(open_files[indexDesc].globalDepth==targetData->localDepth){
-        printf("General split\n");
+        printf("Big split\n");
         fflush(stdout);
         open_files[indexDesc].globalDepth++;
 
