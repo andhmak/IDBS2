@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "typeinfo": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "bf.h": "c"
     }
 }

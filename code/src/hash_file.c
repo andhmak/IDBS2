@@ -464,14 +464,11 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
       //making an array with all the entries of this block
       int entryAmount = 1+targetData->lastEmpty;
       Record *entryArray=malloc(entryAmount*sizeof(Record));  //1 for the new entry and all the entries of the block
-      updateArray = malloc(entryAmount*sizeof(UpdateRecordArray));
+      updateArray = malloc(targetData->lastEmpty*sizeof(UpdateRecordArray));
       entryArray[0].id = record.id;
       strcpy(entryArray[0].name,record.name);
       strcpy(entryArray[0].surname,record.surname);
       strcpy(entryArray[0].city,record.city);
-
-      updateArray[0].record = record;
-      updateArray[0].oldTuple = NULL;
 
       printf("Before for\n");
       fflush(stdout);
@@ -485,15 +482,15 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         printf("1\n");
         fflush(stdout);
 
-        updateArray[i+1].record.id = targetData->index[i].id;
-        strcpy(updateArray[i+1].record.name,targetData->index[i].name);
-        strcpy(updateArray[i+1].record.surname,targetData->index[i].surname);
-        strcpy(updateArray[i+1].record.city,targetData->index[i].city);
+        updateArray[i].record.id = targetData->index[i].id;
+        strcpy(updateArray[i].record.name,targetData->index[i].name);
+        strcpy(updateArray[i].record.surname,targetData->index[i].surname);
+        strcpy(updateArray[i].record.city,targetData->index[i].city);
 
         printf("2\n");
         fflush(stdout);
-        updateArray[i+1].oldTuple->block_num = open_files[indexDesc].index[hashID];
-        updateArray[i+1].oldTuple->record_num = i;
+        updateArray[i].oldTuple.block_num = open_files[indexDesc].index[hashID];
+        updateArray[i].oldTuple.record_num = i;
         printf("3\n");
         fflush(stdout);
       }
@@ -547,7 +544,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         free(open_files[indexDesc].index);
         open_files[indexDesc].index=newIndex;
         for (int i=0;i<entryAmount;i++){
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],updateArray[i].newTuple,updateArray);
+          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],&updateArray[i].newTuple,updateArray);
         }
         free(entryArray);
 
@@ -591,7 +588,7 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         BF_Block_Destroy(&newBlock);
 
         for (int i=0;i<entryAmount;i++){
-          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],updateArray[i].newTuple,updateArray);
+          HT_InsertEntry(open_files[indexDesc].fileDesc,entryArray[i],&updateArray[i].newTuple,updateArray);
         }
         free(entryArray);
 
