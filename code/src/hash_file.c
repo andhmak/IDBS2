@@ -297,6 +297,8 @@ HT_ErrorCode HT_CloseFile(int indexDesc) {
 }
 
 HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, UpdateRecordArray *updateArray) {
+  printf("Inside HT_InsertEntry\n");
+  fflush(stdout);
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
     printf("Invalid indexDesc\n");
@@ -307,7 +309,6 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
   if (open_files[indexDesc].mainPos != -1) {
     indexDesc = open_files[indexDesc].mainPos;
   }
-
   
   int hashID = ((hash_func(record.id) & INT_MAX) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
 
@@ -317,6 +318,9 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
 
   CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc,open_files[indexDesc].index[hashID],targetBlock));
   DataBlock *targetData = (DataBlock *)BF_Block_GetData(targetBlock);
+
+  printf("Checked indexDesc and hashed\n");
+  fflush(stdout);
 
   if(targetData->nextBlock!=-1){ //overflow
     //removed multiblock buckets to simplify the implementation of the secondery index
@@ -391,6 +395,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
   else/*if(targetData->nextBlock==-1)*/{  //only one block
 
     if (targetData->lastEmpty<DATA_ARRAY_SIZE){
+      printf("Bucket is enough\n");
+      fflush(stdout);
       //insert
       targetData->index[targetData->lastEmpty].id = record.id;
       strcpy(targetData->index[targetData->lastEmpty].name,record.name);
@@ -453,6 +459,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
     }
     else{
       //split
+      printf("Bucket is not enough\n");
+      fflush(stdout);
       //making an array with all the entries of this block
       int entryAmount = 1+targetData->lastEmpty;
       Record *entryArray=malloc(entryAmount*sizeof(Record));  //1 for the new entry and all the entries of the block
@@ -487,6 +495,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
       CALL_BF(BF_UnpinBlock(targetBlock));
 
       if(open_files[indexDesc].globalDepth==targetData->localDepth){
+        printf("General split\n");
+        fflush(stdout);
         open_files[indexDesc].globalDepth++;
 
         int *newIndex = malloc((1<<open_files[indexDesc].globalDepth)*sizeof(int));
@@ -529,6 +539,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
         return HT_OK; 
       }
       else if(open_files[indexDesc].globalDepth>targetData->localDepth){
+        printf("Internal split\n");
+        fflush(stdout);
         int shift_amt = open_files[indexDesc].globalDepth - targetData->localDepth;
         int firstIDtoBlock=((hashID >> shift_amt) << shift_amt);
         
@@ -573,6 +585,8 @@ HT_ErrorCode HT_InsertEntry(int indexDesc, Record record, tTuple* tupleId, Updat
     }
   }
 
+  printf("Exiting HT_InsertEntry outside\n");
+  fflush(stdout);
   return HT_OK;
 }
 
