@@ -76,6 +76,7 @@ int main() {
   CALL_OR_DIE(HT_OpenIndex(FILE_NAME_1, &indexDesc1));
   CALL_OR_DIE(SHT_OpenSecondaryIndex(FILE_NAME_2, &indexDesc2));
   Record record;
+  SecondaryRecord secRecord;
   srand(12569874);
   int r;
   tTuple rec_pos;
@@ -88,11 +89,16 @@ int main() {
     memcpy(record.name, names[r], strlen(names[r]) + 1);
     r = rand() % 12;
     memcpy(record.surname, surnames[r], strlen(surnames[r]) + 1);
+    memcpy(secRecord.index_key, surnames[r], strlen(surnames[r]) + 1);
     r = rand() % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
     //printf("Calling HT_InsertEntry\n");
     //fflush(stdout);
     CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
+    secRecord.tupleId.block_num = rec_pos.block_num;
+    secRecord.tupleId.record_num = rec_pos.record_num;
+    CALL_OR_DIE(SHT_SecondaryInsertEntry(indexDesc2, secRecord));
+    CALL_OR_DIE(SHT_SecondaryUpdateEntry(indexDesc2, &updateArray));
     free(updateArray.record);
     free(updateArray.newTuple);
     free(updateArray.oldTuple);
