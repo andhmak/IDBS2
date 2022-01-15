@@ -505,12 +505,12 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
     CALL_BF(BF_UnpinBlock(block));
     for (int i = 0 ; i < PRIMARY_DATA_ARRAY_SIZE ; i++) {
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, open_files[indexDesc].index[hash_string(updateArray->record[i].city)], block));
-      DataBlock* stat = (DataBlock*) BF_Block_GetData(block);
+      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
       for (int j = 0 ; j < DATA_ARRAY_SIZE ; j++) {
-        if ((stat->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
-         && (stat->index[j].tupleId.record_num == updateArray->oldTuple[i].record_num)) {
-           stat->index[j].tupleId.block_num = updateArray->newTuple[i].block_num;
-           stat->index[j].tupleId.record_num = updateArray->newTuple[i].record_num;
+        if ((data->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
+         && (data->index[j].tupleId.record_num == updateArray->oldTuple[i].record_num)) {
+           data->index[j].tupleId.block_num = updateArray->newTuple[i].block_num;
+           data->index[j].tupleId.record_num = updateArray->newTuple[i].record_num;
         }
       }
       CALL_BF(BF_UnpinBlock(block));
@@ -521,12 +521,12 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
     CALL_BF(BF_UnpinBlock(block));
     for (int i = 0 ; i < PRIMARY_DATA_ARRAY_SIZE ; i++) {
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, open_files[indexDesc].index[hash_string(updateArray->record[i].surname)], block));
-      DataBlock* stat = (DataBlock*) BF_Block_GetData(block);
+      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
       for (int j = 0 ; j < DATA_ARRAY_SIZE ; j++) {
-        if ((stat->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
-         && (stat->index[j].tupleId.record_num == updateArray->oldTuple[i].record_num)) {
-           stat->index[j].tupleId.block_num = updateArray->newTuple[i].block_num;
-           stat->index[j].tupleId.record_num = updateArray->newTuple[i].record_num;
+        if ((data->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
+         && (data->index[j].tupleId.record_num == updateArray->oldTuple[i].record_num)) {
+           data->index[j].tupleId.block_num = updateArray->newTuple[i].block_num;
+           data->index[j].tupleId.record_num = updateArray->newTuple[i].record_num;
         }
       }
       CALL_BF(BF_UnpinBlock(block));
