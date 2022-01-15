@@ -115,10 +115,10 @@ int main() {
   //CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, "Ioannidis"));
   
   printf("RUN PrintAllEntries without key on the surname secondary file\n");
-  CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, NULL));
+  //CALL_OR_DIE(SHT_PrintAllEntries(indexDesc2, NULL));
   
   printf("RUN PrintAllEntries with specific key on the city secondary file\n");
-  //CALL_OR_DIE(SHT_PrintAllEntries(indexDesc3, "Athens"));
+  CALL_OR_DIE(SHT_PrintAllEntries(indexDesc3, "Athens"));
   
   printf("RUN PrintAllEntries without key on the city secondary file\n");
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc3, NULL));
