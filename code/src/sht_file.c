@@ -7,7 +7,8 @@
 #include "sht_file.h"
 
 #define INDEX_ARRAY_SIZE ((BF_BLOCK_SIZE-sizeof(int))/sizeof(int))      // Amount of buckets per block of index
-#define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(SecondaryRecord))  // Amount of records per bucket
+#define PRIMARY_DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))  // Amount of primary records per bucket
+#define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(SecondaryRecord))  // Amount of secondary records per bucket
 #define MAX_DEPTH (8*sizeof(int)-8) // Maximum global depth of the hash table
 #define SHIFT_CONST (8*sizeof(uint))
 
