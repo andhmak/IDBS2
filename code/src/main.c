@@ -93,8 +93,8 @@ int main() {
     memcpy(record.surname, surnames[r], strlen(surnames[r]) + 1);
     r = rand() % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
-    printf("Calling HT_InsertEntry\n");
-    fflush(stdout);
+    //printf("Calling HT_InsertEntry\n");
+    //fflush(stdout);
     CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
     free(updateArray.record);
     free(updateArray.newTuple);
