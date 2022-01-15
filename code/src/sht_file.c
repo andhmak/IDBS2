@@ -98,8 +98,10 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
     stat->attribType = 1;
   }
   else {
-    fprintf(stderr, "No such attribute");
+    fprintf(stderr, "No such attribute\n");
+    CALL_BF(BF_UnpinBlock(block));
     CALL_BF(BF_CloseFile(fileDesc));
+    BF_Block_Destroy(&block);
     return HT_ERROR;
   }
   strcpy(stat->mainFileName, fileName);

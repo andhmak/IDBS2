@@ -5,12 +5,12 @@
 #include "bf.h"
 #include "sht_file.h"
 
-#define RECORDS_NUM 16 // you can change it if you want
+#define RECORDS_NUM 128 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
 #define GLOBAL_DEPT_2 1 // you can change it if you want
-#define FILE_NAME_1 "data_4.db"
-#define FILE_NAME_2 "data_5.db"
-#define FILE_NAME_3 "data_6.db"
+#define FILE_NAME_1 "data_7.db"
+#define FILE_NAME_2 "data_8.db"
+#define FILE_NAME_3 "data_9.db"
 
 const char* names[] = {
   "Yannis",
