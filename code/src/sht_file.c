@@ -158,7 +158,6 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
   // Close file
   CALL_BF(BF_CloseFile(fileDesc));
   return HT_OK;
-  return HT_OK;
 }
 
 HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
