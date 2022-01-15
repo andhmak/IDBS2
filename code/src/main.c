@@ -82,7 +82,7 @@ int main() {
   srand(12569874);
   int r;
   tTuple rec_pos;
-  UpdateRecordArray *updateArray;
+  UpdateRecordArray updateArray;
   printf("Insert Entries with different IDs on the first file\n");
   for (int id = 0; id < RECORDS_NUM; ++id) {
     // create a record
@@ -95,7 +95,10 @@ int main() {
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
     printf("Calling HT_InsertEntry\n");
     fflush(stdout);
-    CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, updateArray));
+    CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
+    free(updateArray.record);
+    free(updateArray.newTuple);
+    free(updateArray.oldTuple);
   }
   
   printf("RUN PrintAllEntries with specific ID on the first file\n");
