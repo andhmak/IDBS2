@@ -6,9 +6,9 @@
 #include "sht_file.h"
 #define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
-#define RECORDS_NUM 64 // you can change it if you want
+#define RECORDS_NUM 128 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
-#define GLOBAL_DEPT_2 10 // you can change it if you want
+#define GLOBAL_DEPT_2 2 // you can change it if you want
 #define FILE_NAME_1 "data_1.db"
 #define FILE_NAME_2 "data_2.db"
 
@@ -92,19 +92,11 @@ int main() {
     memcpy(secRecord.index_key, surnames[r], strlen(surnames[r]) + 1);
     r = rand() % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
-    printf("Calling HT_InsertEntry\n");
-    fflush(stdout);
     CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, &updateArray));
     secRecord.tupleId.block_num = rec_pos.block_num;
     secRecord.tupleId.record_num = rec_pos.record_num;
-    printf("Calling SHT_SecondaryInsertEntry\n");
-    fflush(stdout);
     CALL_OR_DIE(SHT_SecondaryInsertEntry(indexDesc2, secRecord));
-    printf("Calling SHT_SecondaryUpdateEntry\n");
-    fflush(stdout);
     CALL_OR_DIE(SHT_SecondaryUpdateEntry(indexDesc2, &updateArray));
-    printf("SHT_SecondaryUpdateEntry ended\n");
-    fflush(stdout);
     free(updateArray.record);
     free(updateArray.newTuple);
     free(updateArray.oldTuple);
@@ -125,6 +117,8 @@ int main() {
 
   printf("RUN HashStatistics on the first open file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_1));
+  printf("RUN HashStatistics on the secondary open file\n");
+  CALL_OR_DIE(HashStatistics(FILE_NAME_2));
 
 
   printf("Close the first file\n");
@@ -132,5 +126,7 @@ int main() {
   CALL_OR_DIE(SHT_CloseSecondaryIndex(indexDesc2));
   printf("RUN HashStatistics on the first closed file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_1));
+  printf("RUN HashStatistics on the secondary closed file\n");
+  CALL_OR_DIE(HashStatistics(FILE_NAME_2));
   BF_Close();
 }

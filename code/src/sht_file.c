@@ -333,7 +333,6 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
 
   
   int hashID = (hash_string(record.index_key) >> (SHIFT_CONST - open_files[indexDesc].globalDepth));
-  printf("hashID: %d\n", hashID);
 
 
   BF_Block *targetBlock;
