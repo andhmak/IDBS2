@@ -774,9 +774,15 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   BF_Block* block3;
   BF_Block_Init(&block3);
 
+  int last_bucket = 0, new_bucket;
   int indexSize = 1 << open_files[sindexDesc1].globalDepth;
   for (int i = 0 ; i < indexSize ; i++) {
-    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, open_files[sindexDesc1].index[i], block));
+    new_bucket = open_files[sindexDesc1].index[i];
+    if (last_bucket == new_bucket) {
+      continue;
+    }
+    last_bucket = new_bucket;
+    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, new_bucket, block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
     for (int j = 0 ; j < data->lastEmpty ; j++) {
       int hashID = hash_string(data->index[j].index_key) >> (SHIFT_CONST - open_files[sindexDesc2].globalDepth);

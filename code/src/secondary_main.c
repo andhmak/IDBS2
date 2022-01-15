@@ -4,7 +4,6 @@
 #include <time.h>
 #include "bf.h"
 #include "sht_file.h"
-#define DATA_ARRAY_SIZE ((BF_BLOCK_SIZE-3*sizeof(int))/sizeof(Record))
 
 #define RECORDS_NUM 128 // you can change it if you want
 #define GLOBAL_DEPT_1 2 // you can change it if you want
