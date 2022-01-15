@@ -774,22 +774,57 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
   BF_Block* block3;
   BF_Block_Init(&block3);
 
-  int last_bucket = 0, new_bucket;
-  int indexSize = 1 << open_files[sindexDesc1].globalDepth;
-  for (int i = 0 ; i < indexSize ; i++) {
-    new_bucket = open_files[sindexDesc1].index[i];
-    if (last_bucket == new_bucket) {
-      continue;
+  // if index_key is NULL, traverse the entire first table and for each entry find the corresponding in the second
+  if (index_key == NULL) {
+    int last_bucket = 0, new_bucket;
+    int indexSize = 1 << open_files[sindexDesc1].globalDepth;
+    for (int i = 0 ; i < indexSize ; i++) {
+      new_bucket = open_files[sindexDesc1].index[i];
+      if (last_bucket == new_bucket) {
+        continue;
+      }
+      last_bucket = new_bucket;
+      CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, new_bucket, block));
+      DataBlock* data = (DataBlock*) BF_Block_GetData(block);
+      for (int j = 0 ; j < data->lastEmpty ; j++) {
+        int hashID = hash_string(data->index[j].index_key) >> (SHIFT_CONST - open_files[sindexDesc2].globalDepth);
+        CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hashID], block2));
+        DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
+        for (int k = 0 ; k < data2->lastEmpty ; k++) {
+          if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
+            CALL_BF(BF_GetBlock(mainFileDesc1, data->index[j].tupleId.block_num, block3));
+            PrimaryDataBlock* data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
+            Record rec = data3->index[data->index[j].tupleId.record_num];
+            printf("{%i,%s,%s,%s} - ", rec.id, rec.name, rec.surname, rec.city);
+            CALL_BF(BF_UnpinBlock(block3));
+            CALL_BF(BF_GetBlock(mainFileDesc2, data2->index[k].tupleId.block_num, block3));
+            data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
+            rec = data3->index[data2->index[k].tupleId.record_num];
+            printf("{%i,%s,%s,%s}\n", rec.id, rec.name, rec.surname, rec.city);
+            CALL_BF(BF_UnpinBlock(block3));
+          }
+        }
+        CALL_BF(BF_UnpinBlock(block2));
+      }
+      CALL_BF(BF_UnpinBlock(block));
     }
-    last_bucket = new_bucket;
-    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, new_bucket, block));
+  }
+
+
+  // if index_key isn't NULL, find it in the first table and then in the second
+  else {
+    int hashID1 = hash_string(index_key) >> (SHIFT_CONST - open_files[sindexDesc1].globalDepth);
+    CALL_BF(BF_GetBlock(open_files[sindexDesc1].fileDesc, hashID1, block));
     DataBlock* data = (DataBlock*) BF_Block_GetData(block);
     for (int j = 0 ; j < data->lastEmpty ; j++) {
-      int hashID = hash_string(data->index[j].index_key) >> (SHIFT_CONST - open_files[sindexDesc2].globalDepth);
-      CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hashID], block2));
+      if (strcmp(data->index[j].index_key, index_key)) {
+        continue;
+      }
+      int hashID2 = hash_string(data->index[j].index_key) >> (SHIFT_CONST - open_files[sindexDesc2].globalDepth);
+      CALL_BF(BF_GetBlock(open_files[sindexDesc2].fileDesc, open_files[sindexDesc2].index[hashID2], block2));
       DataBlock* data2 = (DataBlock*) BF_Block_GetData(block2);
       for (int k = 0 ; k < data2->lastEmpty ; k++) {
-        if ((!strcmp(data->index[j].index_key, data2->index[k].index_key)) && ((index_key == NULL) || (!strcmp(data->index[j].index_key, index_key)))) {
+        if (!strcmp(data->index[j].index_key, data2->index[k].index_key)) {
           CALL_BF(BF_GetBlock(mainFileDesc1, data->index[j].tupleId.block_num, block3));
           PrimaryDataBlock* data3 = (PrimaryDataBlock*) BF_Block_GetData(block3);
           Record rec = data3->index[data->index[j].tupleId.record_num];
@@ -806,6 +841,7 @@ HT_ErrorCode SHT_InnerJoin(int sindexDesc1, int sindexDesc2, char *index_key) {
     }
     CALL_BF(BF_UnpinBlock(block));
   }
+
   BF_Block_Destroy(&block);
   BF_Block_Destroy(&block2);
   BF_Block_Destroy(&block3);
