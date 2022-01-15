@@ -43,4 +43,4 @@ run:
 
 clean:
 	@echo " Delete binary, build and data ...";
-	-rm -f ./bin/runner ./build/main.o ./build/error_main.o ./build/hash_file.o ./data.db ./data1.db ./data_1.db ./data_2.db ./data_3.db
+	-rm -f ./bin/runner ./build/main.o ./build/error_main.o ./build/hash_file.o ./data.db ./data1.db ./data_1.db ./data_2.db ./data_3.db ./data_4.db ./data_5.db ./data_6.db
