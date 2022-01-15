@@ -489,8 +489,6 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
   if (updateArray->record == NULL) {
     return HT_OK;
   }
-  printf("SHT_SecondaryUpdateEntry: not NULL\n");
-  fflush(stdout);
 
   BF_Block* block;
   BF_Block_Init(&block);
@@ -501,12 +499,8 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
   if (stat->attribType == 0) {
     CALL_BF(BF_UnpinBlock(block));
     for (int i = 0 ; i < PRIMARY_DATA_ARRAY_SIZE ; i++) {
-      printf("a, i = %d\n", i);
-      fflush(stdout);
       int hashID = hash_string(updateArray->record[i].city) >> (SHIFT_CONST - open_files[indexDesc].globalDepth);
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, open_files[indexDesc].index[hashID], block));
-      printf("b\n");
-      fflush(stdout);
       DataBlock* data = (DataBlock*) BF_Block_GetData(block);
       for (int j = 0 ; j < DATA_ARRAY_SIZE ; j++) {
         if ((data->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
@@ -522,12 +516,8 @@ HT_ErrorCode SHT_SecondaryUpdateEntry (int indexDesc, UpdateRecordArray *updateA
   if (stat->attribType == 1) {
     CALL_BF(BF_UnpinBlock(block));
     for (int i = 0 ; i < PRIMARY_DATA_ARRAY_SIZE ; i++) {
-      printf("a, i = %d\n", i);
-      fflush(stdout);
       int hashID = hash_string(updateArray->record[i].surname) >> (SHIFT_CONST - open_files[indexDesc].globalDepth);
       CALL_BF(BF_GetBlock(open_files[indexDesc].fileDesc, open_files[indexDesc].index[hashID], block));
-      printf("b\n");
-      fflush(stdout);
       DataBlock* data = (DataBlock*) BF_Block_GetData(block);
       for (int j = 0 ; j < DATA_ARRAY_SIZE ; j++) {
         if ((data->index[j].tupleId.block_num == updateArray->oldTuple[i].block_num)
