@@ -89,3 +89,5 @@ HT_ErrorCode HT_PrintAllEntries(
 	int indexDesc,	/* θέση στον πίνακα με τα ανοιχτά αρχεία */
 	int *id 				/* τιμή του πεδίου κλειδιού προς αναζήτηση */
 	);
+
+HT_ErrorCode HashStatistics(char* filename);

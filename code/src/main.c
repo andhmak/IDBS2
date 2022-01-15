@@ -81,6 +81,8 @@ int main() {
   Record record;
   srand(12569874);
   int r;
+  tTuple rec_pos;
+  UpdateRecordArray *updateArray;
   printf("Insert Entries with different IDs on the first file\n");
   for (int id = 0; id < RECORDS_NUM; ++id) {
     // create a record
@@ -92,7 +94,7 @@ int main() {
     r = rand() % 10;
     memcpy(record.city, cities[r], strlen(cities[r]) + 1);
 
-    CALL_OR_DIE(HT_InsertEntry(indexDesc1, record));
+    CALL_OR_DIE(HT_InsertEntry(indexDesc1, record, &rec_pos, updateArray));
   }
   
   printf("RUN PrintAllEntries with specific ID on the first file\n");
@@ -116,7 +118,7 @@ int main() {
      r = rand() % 10;
      memcpy(record.city, cities[r], strlen(cities[r]) + 1);
 
-     CALL_OR_DIE(HT_InsertEntry(indexDesc2, record));
+     //CALL_OR_DIE(HT_InsertEntry(indexDesc2, record));
    }
 
   printf("RUN PrintAllEntries with ID on the second file\n");
