@@ -431,7 +431,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
         free(open_files[indexDesc].index);
         open_files[indexDesc].index=newIndex;
         for (int i=0;i<entryAmount;i++){
-          SHT_SeconderyInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
+          SHT_SecondaryInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
         }
         free(entryArray);
 
@@ -473,7 +473,7 @@ HT_ErrorCode SHT_SecondaryInsertEntry (int indexDesc,SecondaryRecord record) {//
         BF_Block_Destroy(&newBlock);
 
         for (int i=0;i<entryAmount;i++){
-          SHT_SeconderyInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
+          SHT_SecondaryInsertEntry(open_files[indexDesc].fileDesc,entryArray[i]);
         }
         free(entryArray);
 
