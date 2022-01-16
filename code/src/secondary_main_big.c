@@ -149,9 +149,11 @@ int main() {
   CALL_OR_DIE(SHT_CloseSecondaryIndex(indexDesc2));
   printf("Close the city secondary file\n");
   CALL_OR_DIE(SHT_CloseSecondaryIndex(indexDesc3));
+
   printf("RUN HashStatistics on the surname secondary closed file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_2));
   printf("RUN HashStatistics on the city secondary closed file\n");
   CALL_OR_DIE(HashStatistics(FILE_NAME_3));
+  
   BF_Close();
 }
