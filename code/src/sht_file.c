@@ -65,12 +65,12 @@ uint hash_string(char* string) {
 extern OpenFileData open_files[MAX_OPEN_FILES];
 
 HT_ErrorCode SHT_Init() {
-  //insert code here
+  // We don't need to do anything in the secondary Init
+  // the open files array is initalised in HT_Init
   return HT_OK;
 }
 
 HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int attrLength, int depth, char *fileName) {
-  //insert code here
   // Create block file
   CALL_BF(BF_CreateFile(sfileName));
   int fileDesc;
@@ -161,7 +161,6 @@ HT_ErrorCode SHT_CreateSecondaryIndex(const char *sfileName, char *attrName, int
 }
 
 HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
-  //insert code here
   // Check for empty position in open files array
   int i;
   for (i = 0 ; i < MAX_OPEN_FILES ; i++) {
@@ -228,7 +227,6 @@ HT_ErrorCode SHT_OpenSecondaryIndex(const char *sfileName, int *indexDesc) {
 }
 
 HT_ErrorCode SHT_CloseSecondaryIndex(int indexDesc) {
-  //insert code here
   // Check if indexDesc valid
   if ((indexDesc < 0) || (indexDesc >= MAX_OPEN_FILES) || (open_files[indexDesc].fileDesc == -1)) {
     printf("Invalid indexDesc\n");
@@ -619,7 +617,6 @@ HT_ErrorCode SHT_PrintAllEntries(int sindexDesc, char *index_key ) {
 }
 
 HT_ErrorCode SHT_HashStatistics(char *filename) {
-  //insert code here
   // Check if file is open
   int i;
   for (i = 0 ; i < MAX_OPEN_FILES ; i++) {
@@ -713,6 +710,7 @@ HT_ErrorCode SHT_HashStatistics(char *filename) {
 
     BF_Block_Destroy(&indexBlock);
     BF_Block_Destroy(&block);
+    
     // Close file
     CALL_BF(BF_CloseFile(fd));
   }
