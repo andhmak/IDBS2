@@ -66,6 +66,7 @@ const char* cities[] = {
 int main() {
   BF_Init(LRU);
   CALL_OR_DIE(HT_Init());
+  CALL_OR_DIE(SHT_Init());
 
   printf("Create the primary file\n");
   CALL_OR_DIE(HT_CreateIndex(FILE_NAME_1, GLOBAL_DEPT_1));
@@ -126,10 +127,10 @@ int main() {
   CALL_OR_DIE(SHT_PrintAllEntries(indexDesc3, NULL));
 
   printf("RUN HashStatistics on the surname secondary open file\n");
-  CALL_OR_DIE(HashStatistics(FILE_NAME_2));
+  CALL_OR_DIE(SHT_HashStatistics(FILE_NAME_2));
 
   printf("RUN HashStatistics on the city secondary open file\n");
-  CALL_OR_DIE(HashStatistics(FILE_NAME_3));
+  CALL_OR_DIE(SHT_HashStatistics(FILE_NAME_3));
 
   printf("RUN InnerJoin on the surname with specific key\n");
   CALL_OR_DIE(SHT_InnerJoin(indexDesc2, indexDesc2, "Ioannidis"));
@@ -150,8 +151,8 @@ int main() {
   printf("Close the city secondary file\n");
   CALL_OR_DIE(SHT_CloseSecondaryIndex(indexDesc3));
   printf("RUN HashStatistics on the surname secondary closed file\n");
-  CALL_OR_DIE(HashStatistics(FILE_NAME_2));
+  CALL_OR_DIE(SHT_HashStatistics(FILE_NAME_2));
   printf("RUN HashStatistics on the city secondary closed file\n");
-  CALL_OR_DIE(HashStatistics(FILE_NAME_3));
+  CALL_OR_DIE(SHT_HashStatistics(FILE_NAME_3));
   BF_Close();
 }
